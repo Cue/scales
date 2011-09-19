@@ -26,7 +26,7 @@ setup(name='scales',
       license='Apache',
       author='Greplin, Inc.',
       author_email='opensource@greplin.com',
-      url='http://www.github.com/Greplin/scales',
+      url='https://www.github.com/Greplin/scales',
       package_dir = {'':'src'},
       packages = [
         'greplin',
