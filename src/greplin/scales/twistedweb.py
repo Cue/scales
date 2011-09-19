@@ -55,7 +55,7 @@ class StatsResource(resource.Resource):
       formats.jsonFormat(request, statDict, query)
 
     else:
-      formats.htmlHeader(request, '/' + '/'.join(parts), self.servername, query)
+      formats.htmlHeader(request, '/' + '/'.join(parts), self.serverName, query)
       formats.htmlFormat(request, tuple(parts), statDict, query)
 
     return ''
