@@ -1,27 +1,15 @@
-scales
-======
-
 Scales - Metrics for Python
----------------------------
+===========================
 
 Tracks server state and statistics, allowing you to see what your server is
-doing. Report over HTTP and log to Graphite for graphing.
+doing. It can also send metrics to Graphite for graphing or to a file for crash forensics. 
 
-
-### Status
+scales is inspired by the fantastic [metrics](https://github.com/codahale/metrics) library, though it is by
+no means a port.
 
 This is a brand new release - issue reports and pull requests are very much appreciated!
 
 
-### Pre-requisites
-
-The HTTP statistics viewer in scales requires one of the following web frameworks:
-
-[Flask](http://flask.pocoo.org/)
-[Tornado](http://www.tornadoweb.org/)
-[Twisted](http://twistedmatrix.com/trac/)
-
-If you aren't sure, go with Flask; it's compatible with most every other event loop.
 
 ### Installation
 
@@ -31,15 +19,16 @@ If you aren't sure, go with Flask; it's compatible with most every other event l
 
     python setup.py install
 
+The HTTP statistics viewer in scales requires one of the following web frameworks:
 
-### Introduction
+[Flask](http://flask.pocoo.org/)
 
-scales provides you with stats pages so you can see what your server is doing.
+[Tornado](http://www.tornadoweb.org/)
 
-It can also send metrics to Graphite for graphing or to a file for crash forensics.
+[Twisted](http://twistedmatrix.com/trac/)
 
-scales is inspired by the fantastic [metrics](https://github.com/codahale/metrics) library, though it is by
-no means a port.
+If you aren't sure, go with Flask; it's compatible with most every other event
+loop. You can get it with `pip install flask`.
 
 
 ### How to use it
