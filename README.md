@@ -122,12 +122,16 @@ a `PmfStat` and assign new values to it:
 
 ```python
 for person in people:
-  person.perturb(frobnication='most')
+  person.perturb(42)
   STATS.wistfulness = person.getFeelings('wistfulness')
 ```
 
 
 #### Class Stats
+
+While global stats are easy to use, sometimes making stats class-based makes
+more sense. This is supported; just make sure to give each instance of the class
+a unique identifier with `scales.init`.
 
 ```python
 class Handler(object):
@@ -152,6 +156,13 @@ Simple lambdas can be used to generate stat values.
 
 ```python
 STATS = scales.collection(scales.Stat('currentTime', lambda: time.time())
+```
+
+Of course this works with arbitrary function objects, so the example above could
+also be written:
+
+```python
+STATS = scales.collection(scales.Stat('currentTime', time.time)
 ```
 
 
