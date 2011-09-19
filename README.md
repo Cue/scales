@@ -4,7 +4,8 @@ scales
 Scales - Metrics for Python
 ---------------------------
 
-Tracks server state and statistics, allowing you to see what your server is doing.
+Tracks server state and statistics, allowing you to see what your server is
+doing. Report over HTTP and log to Graphite for graphing.
 
 
 ### Status
@@ -14,12 +15,13 @@ This is a brand new release - issue reports and pull requests are very much appr
 
 ### Pre-requisites
 
-scales works best when paired with one of the following web frameworks:
+The HTTP statistics viewer in scales requires one of the following web frameworks:
 
 [Flask](http://flask.pocoo.org/)
 [Tornado](http://www.tornadoweb.org/)
 [Twisted](http://twistedmatrix.com/trac/)
 
+If you aren't sure, go with Flask; it's compatible with most every other event loop.
 
 ### Installation
 
@@ -40,9 +42,13 @@ scales is inspired by the fantastic [metrics](https://github.com/codahale/metric
 no means a port.
 
 
-#### Simple Use
+### How to use it
+
+Getting started and adding stats only takes a few lines of code:
 
 ```python
+from greplin import scales
+
 STATS = scales.collection('/web',
     scales.IntStat('errors'),
     scales.IntStat('success'))
@@ -50,6 +56,74 @@ STATS = scales.collection('/web',
 # In a request handler
 
 STATS.success += 1
+```
+
+This code will collect two integer stats, which is nice, but what you really
+want to do is *look* at those stats, to get insight into what your server is
+doing. There are two main ways of doing this: the HTTP server and Graphite
+logging.
+
+The HTTP server is the simplest way to get stats out of a running server. The
+easiest way, if you have Flask installed, is to do this:
+
+```python
+import greplin.scales.flaskhandler as statserver
+statserver.serveInBackground(8765)
+```
+
+This will spawn a background thread that will listen on port 8765, and serve up
+a very convenient view of all your stats. To see it, go to
+
+http://localhost:8765/status/
+
+You can also get the stats in JSON by appending `?format=json` to the URL.
+
+The HTTP server is good for doing spot checks on the internals of running
+servers, but what about continuous monitoring? How do you generate graphs of
+stats over time? This is where [Graphite](http://graphite.wikidot.com/) comes
+in. Graphite is a server for collecting stats and graphing them, and scales has
+easy support for using it. Again, this is handled in a background thread:
+
+```python
+graphitePusher = graphite.GraphitePeriodicPusher('graphite-collector-hostname', 2003, 'my.server.prefix.')
+graphitePusher.addStat(STATS.errors)
+graphitePusher.addStat(STATS.success)
+graphitePusher.start()
+```
+
+That's it!  Numeric stats will now be pushed to Graphite every minute.
+
+#### Timing sections of code
+
+To better understand the performance of certain critical sections of your code,
+scales lets you collect timing information:
+
+```python
+from greplin import scales
+
+STATS = scales.collection('/web',
+    scales.IntStat('errors'),
+    scales.IntStat('success'),
+    scales.PmfStat('latency'))
+
+# In a request handler
+
+with STATS.latency.time():
+  do_something_expensive()
+```
+
+This will collect statistics on the running times of that section of code: mean
+time, median, standard deviation, and several percentiles to help you locate
+outlier times. This happens in pretty small constant memory, so don't worry
+about the cost; time anything you like.
+
+You can gather this same kind of sample statistics about any quantity. Just make
+a `PmfStat` and assign new values to it:
+
+```python
+for person in people:
+  person.perturb(frobnication='most')
+  STATS.wistfulness = person.getFeelings('wistfulness')
 ```
 
 
@@ -128,15 +202,6 @@ class SomeThread(object):
 This will result in stats at paths like `/processor/thread-0/started` as well as stats like
 `/processor/state/waitingForTask` which counts the number of threads in the `waitingForTask` state.
 
-
-
-### Graphite Integration
-
-```python
-graphite.GraphitePeriodicPusher('graphite-collector-hostname', 2003, 'my.server.prefix.').start()
-```
-
-That's it!  Numeric stats will now be pushed to Graphite every minute.
 
 
 
