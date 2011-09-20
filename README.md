@@ -2,7 +2,7 @@ Scales - Metrics for Python
 ===========================
 
 Tracks server state and statistics, allowing you to see what your server is
-doing. It can also send metrics to Graphite for graphing or to a file for crash forensics. 
+doing. It can also send metrics to Graphite for graphing or to a file for crash forensics.
 
 scales is inspired by the fantastic [metrics](https://github.com/codahale/metrics) library, though it is by
 no means a port.
@@ -198,7 +198,7 @@ class SomeThread(object):
 
 ```
 
-This will result in stats at paths like `/processor/thread-0/started` as well as stats like
+This will result in stats at paths like `/processor/thread-0/finished` as well as stats like
 `/processor/state/waitingForTask` which counts the number of threads in the `waitingForTask` state.
 
 
