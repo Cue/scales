@@ -32,9 +32,9 @@ class Root1(object):
     scales.init(self, 'path/to/A')
 
 
-  def getChild(self, cls):
+  def getChild(self, cls, *args):
     """Creates a child."""
-    return cls()
+    return cls(*args)
 
 
 
@@ -178,18 +178,39 @@ class StatsTest(unittest.TestCase):
     }, scales.getStats())
 
 
+  def testMultilevelChild(self):
+    """Tests for multi-level child stats."""
+    a = Root1()
+    c = a.getChild(Child, 'sub/path')
+    c.countStat += 1
+
+    self.assertEquals({
+      'path': {
+        'to': {
+          'A': {
+            'sub': {
+              'path': {
+                'count': 1
+              }
+            }
+          }
+        }
+      }
+    }, scales.getStats())
+
+
   def testStatSum(self):
-    """Tests for summed scales."""
+    """Tests for summed stats."""
     self.helpTestStatSum(AggregatingRoot())
 
 
   def testStatSumWithSubclassRoot(self):
-    """Tests for summed scales."""
+    """Tests for summed stats."""
     self.helpTestStatSum(AggregatingRootSubclass())
 
 
   def helpTestStatSum(self, a):
-    """Helps test summed scales."""
+    """Helps test summed stats."""
     c = a.getChild(Child)
 
     self.assertEquals({
@@ -281,7 +302,7 @@ class StatsTest(unittest.TestCase):
 
 
   def testIntDictStats(self):
-    """Tests for int dict scales."""
+    """Tests for int dict stats."""
     a = Root1()
     a.errorsStat['400'] += 1
     a.errorsStat['400'] += 2
@@ -310,7 +331,7 @@ class StatsTest(unittest.TestCase):
 
 
   def testIntDictStatsAggregation(self):
-    """Tests for int dict scales."""
+    """Tests for int dict stats."""
     root = AggregatingRoot()
 
     errorHolder = root.getChild(Child)
@@ -337,7 +358,7 @@ class StatsTest(unittest.TestCase):
 
 
   def testDynamic(self):
-    """Tests for dynamic scales."""
+    """Tests for dynamic stats."""
     DynamicRoot()
     self.assertEquals(100, scales.getStats()['dynamic']())
 
