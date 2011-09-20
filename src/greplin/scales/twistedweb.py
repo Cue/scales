@@ -53,7 +53,9 @@ class StatsResource(resource.Resource):
     if 'format' in request.args and request.args['format'][0] == 'json':
       request.headers['content-type'] = 'text/javascript; charset=UTF-8'
       formats.jsonFormat(request, statDict, query)
-
+    elif 'format' in request.args and request.args['format'][0] == 'prettyjson':
+      request.headers['content-type'] = 'text/javascript; charset=UTF-8'
+      formats.jsonFormat(request, statDict, query, pretty=True)
     else:
       formats.htmlHeader(request, '/' + '/'.join(parts), self.serverName, query)
       formats.htmlFormat(request, tuple(parts), statDict, query)

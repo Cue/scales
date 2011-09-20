@@ -41,6 +41,8 @@ def statsHandler(serverName, path=''):
   query = request.args.get('query', None)
   if outputFormat == 'json':
     formats.jsonFormat(output, statDict, query)
+  elif outputFormat == 'prettyjson':
+    formats.jsonFormat(output, statDict, query, pretty=True)
   else:
     formats.htmlHeader(output, '/' + path, serverName, query)
     formats.htmlFormat(output, tuple(parts), statDict, query)

@@ -51,6 +51,8 @@ class StatsHandler(tornado.web.RequestHandler):
     query = self.get_argument('query', default=None)
     if outputFormat == 'json':
       formats.jsonFormat(self, statDict, query)
+    elif outputFormat == 'prettyjson':
+      formats.jsonFormat(self, statDict, query, pretty=True)
     else:
       formats.htmlHeader(self, '/' + path, self.servername, query)
       formats.htmlFormat(self, tuple(parts), statDict, query)

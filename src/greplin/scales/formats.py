@@ -126,9 +126,11 @@ def _htmlRenderDict(pathParts, statDict, output):
   output.write('</table>')
 
 
-def jsonFormat(output, statDict = None, query = None):
+def jsonFormat(output, statDict = None, query = None, pretty = False):
   """Formats as JSON, writing to the given object."""
   statDict = statDict or scales.getStats()
   if query:
     statDict = runQuery(statDict, query)
-  json.dump(statDict, output, cls=scales.StatContainerEncoder)
+  indent = (pretty and 2) or None
+  json.dump(statDict, output, cls=scales.StatContainerEncoder, indent=indent)
+  output.write('\n')
