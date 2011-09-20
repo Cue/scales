@@ -198,8 +198,11 @@ class SomeThread(object):
 
 ```
 
-This will result in stats at paths like `/processor/thread-0/started` as well as stats like
-`/processor/state/waitingForTask` which counts the number of threads in the `waitingForTask` state.
+This will result in a stat at the path `/processor/finished` which counts the
+total of the `finished` stats in each `SomeThread` object, as well as per-object
+stats with paths like `/processor/thread-0/finished`. There will also be stats
+like `/processor/state/waitingForTask` which counts the number of threads in the
+`waitingForTask` state.
 
 
 
