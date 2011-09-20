@@ -57,7 +57,7 @@ easiest way, if you have Flask installed, is to do this:
 
 ```python
 import greplin.scales.flaskhandler as statserver
-statserver.serveInBackground(8765)
+statserver.serveInBackground(8765, serverName='something-server-42')
 ```
 
 This will spawn a background thread that will listen on port 8765, and serve up
@@ -74,13 +74,12 @@ in. Graphite is a server for collecting stats and graphing them, and scales has
 easy support for using it. Again, this is handled in a background thread:
 
 ```python
-graphitePusher = graphite.GraphitePeriodicPusher('graphite-collector-hostname', 2003, 'my.server.prefix.')
-graphitePusher.addStat(STATS.errors)
-graphitePusher.addStat(STATS.success)
-graphitePusher.start()
+graphite.GraphitePeriodicPusher('graphite-collector-hostname', 2003, 'my.server.prefix.').start()
 ```
 
-That's it!  Numeric stats will now be pushed to Graphite every minute.
+That's it!  Numeric stats will now be pushed to Graphite every minute. You can
+exclude stats from graphite logging with the `doNotLog(prefix)` method of the
+`GraphitePeriodicPusher` class.
 
 #### Timing sections of code
 
