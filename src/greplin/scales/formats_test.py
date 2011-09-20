@@ -63,4 +63,4 @@ class StatsTest(unittest.TestCase):
     out = StringIO.StringIO()
     formats.jsonFormat(out)
 
-    self.assertEquals('{"here": {"count": 1}}', out.getvalue())
+    self.assertEquals('{"here": {"count": 1}}\n', out.getvalue())
