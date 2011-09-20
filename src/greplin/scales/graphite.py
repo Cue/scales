@@ -54,11 +54,6 @@ class GraphitePeriodicPusher(threading.Thread):
       self._push()
 
 
-  def addStat(self, stat, name=None):
-    """Add a stat to be pushed to Graphite."""
-    self.stats[name or stat.getName()] = stat
-
-
   def _sanitize(self, name):
     """Sanitize a name for graphite."""
     return name.strip().replace(' ', '-').replace('.', '-')
