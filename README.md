@@ -65,7 +65,8 @@ a very convenient view of all your stats. To see it, go to
 
 http://localhost:8765/status/
 
-You can also get the stats in JSON by appending `?format=json` to the URL.
+You can also get the stats in JSON by appending `?format=json` to the
+URL. `?format=prettyjson` is the same thing, but pretty-printed.
 
 The HTTP server is good for doing spot checks on the internals of running
 servers, but what about continuous monitoring? How do you generate graphs of
