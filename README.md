@@ -1,4 +1,4 @@
-Scales - Metrics for Python
+scales - Metrics for Python
 ===========================
 
 Tracks server state and statistics, allowing you to see what your server is
