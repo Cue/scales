@@ -130,19 +130,20 @@ class _Stats(object):
 
 
   @classmethod
-  def initChild(cls, obj, name, subContext):
+  def initChild(cls, obj, name, subContext, parent = None):
     """Implementation of initChild."""
     addr = statsId(obj)
     if addr not in cls.containerMap:
-      # Find out the parent of the calling object by going back through the call stack until a self != this.
-      f = inspect.currentframe()
-      while not cls.__getSelf(f):
+      if not parent:
+        # Find out the parent of the calling object by going back through the call stack until a self != this.
+        f = inspect.currentframe()
+        while not cls.__getSelf(f):
+          f = f.f_back
+        this = cls.__getSelf(f)
         f = f.f_back
-      this = cls.__getSelf(f)
-      f = f.f_back
-      while cls.__getSelf(f) == this or not cls.__getSelf(f):
-        f = f.f_back
-      parent = cls.__getSelf(f)
+        while cls.__getSelf(f) == this or not cls.__getSelf(f):
+          f = f.f_back
+        parent = cls.__getSelf(f)
 
       # Default subcontext to an autoincrementing ID.
       if subContext is None:
@@ -447,9 +448,8 @@ class PmfStatDict(UserDict):
   class TimeManager(object):
     """Context manager for timing."""
 
-    def __init__(self, parent, instance):
-      self.parent = parent
-      self.instance = instance
+    def __init__(self, container):
+      self.container = container
       self.msg99 = None
       self.start = None
       self.__discard = False
@@ -463,9 +463,9 @@ class PmfStatDict(UserDict):
     def __exit__(self, *_):
       if not self.__discard:
         latency = time.time() - self.start
-        self.parent.__set__(self.instance, latency)
+        self.container.addValue(latency)
 
-        if self.parent.percentile99 is not None and latency >= self.parent.percentile99:
+        if self.container.percentile99 is not None and latency >= self.container.percentile99:
           if self.msg99 is not None:
             logger, msg, args = self.msg99
             logger.warn(msg, *args)
@@ -483,10 +483,12 @@ class PmfStatDict(UserDict):
       self.__discard = True
 
 
-  def __init__(self, parent, instance):
+  def __init__(self):
     UserDict.__init__(self)
-    self.parent = parent
-    self.instance = instance
+    self.__sample = UniformSample()
+    self.__timestamp = 0
+    self.percentile99 = None
+    self['count'] = 0
 
 
   def __getitem__(self, item):
@@ -496,9 +498,30 @@ class PmfStatDict(UserDict):
       return 0.0
 
 
+  def addValue(self, value):
+    """Updates the dictionary."""
+    self['count'] += 1
+    self.__sample.update(value)
+    if time.time() > self.__timestamp + 20 and len(self.__sample) > 1:
+      self.__timestamp = time.time()
+      self['min'] = self.__sample.min
+      self['max'] = self.__sample.max
+      self['mean'] = self.__sample.mean
+      self['stddev'] = self.__sample.stddev
+
+      percentiles = self.__sample.percentiles([0.5, 0.75, 0.95, 0.98, 0.99, 0.999])
+      self['median'] = percentiles[0]
+      self['75percentile'] = percentiles[1]
+      self['95percentile'] = percentiles[2]
+      self['98percentile'] = percentiles[3]
+      self['99percentile'] = percentiles[4]
+      self.percentile99 = percentiles[4]
+      self['999percentile'] = percentiles[5]
+
+
   def time(self):
     """Measure the time this section of code takes. For use in with statements."""
-    return self.TimeManager(self.parent, self.instance)
+    return self.TimeManager(self)
 
 
 
@@ -510,33 +533,41 @@ class PmfStat(Stat):
 
   def __init__(self, name, _=None):
     Stat.__init__(self, name, None)
-    self.__sample = UniformSample()
-    self.__timestamp = time.time()
-    self.percentile99 = None
 
 
-  def _getDefault(self, instance):
-    return PmfStatDict(self, instance)
+  def _getDefault(self, _):
+    return PmfStatDict()
 
 
   def __set__(self, instance, value):
-    self.__sample.update(value)
-    if time.time() > self.__timestamp + 20 and len(self.__sample) > 1:
-      self.__timestamp = time.time()
-      histogram = self.__get__(instance, None)
-      histogram['min'] = self.__sample.min
-      histogram['max'] = self.__sample.max
-      histogram['mean'] = self.__sample.mean
-      histogram['stddev'] = self.__sample.stddev
+    self.__get__(instance, None).addValue(value)
 
-      percentiles = self.__sample.percentiles([0.5, 0.75, 0.95, 0.98, 0.99, 0.999])
-      histogram['median'] = percentiles[0]
-      histogram['75percentile'] = percentiles[1]
-      histogram['95percentile'] = percentiles[2]
-      histogram['98percentile'] = percentiles[3]
-      histogram['99percentile'] = percentiles[4]
-      self.percentile99 = percentiles[4]
-      histogram['999percentile'] = percentiles[5]
+
+
+class NamedPmfDict(UserDict):
+  """Dictionary of strings."""
+
+  def __init__(self):
+    UserDict.__init__(self)
+
+
+  def __getitem__(self, item):
+    if item not in self:
+      value = PmfStatDict()
+      UserDict.__setitem__(self, item, value)
+    return UserDict.__getitem__(self, item)
+
+
+  def __setitem__(self, key, value):
+    self[key].addValue(value)
+
+
+
+class NamedPmfDictStat(Stat):
+  """Dictionary stat value class.  Not compatible with aggregation at this time."""
+
+  def _getDefault(self, _):
+    return NamedPmfDict()
 
 
 
