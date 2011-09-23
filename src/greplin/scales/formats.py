@@ -72,9 +72,16 @@ def htmlHeader(output, path, serverName, query = None):
   output.write('''
 <style>
 body,td { font-family: monospace }
-td { color: #090; vertical-align: top }
-td.key { color: black; font-weight: bold }
-td.int, td.float { color: #00c }
+.level div {
+  padding-bottom: 4px;
+}
+.level .level {
+  margin-left: 2em;
+  padding: 1px 0;
+}
+span { color: #090; vertical-align: top }
+.key { color: black; font-weight: bold }
+.int, .float { color: #00c }
 </style>
   ''')
   output.write('<h1 style="margin: 0">Stats</h1>')
@@ -99,7 +106,7 @@ def _htmlRenderDict(pathParts, statDict, output):
 
   links = []
 
-  output.write('<table>')
+  output.write('<div class="level">')
   for key in keys:
     keyStr = cgi.escape(str(key))
     value = statDict[key]
@@ -107,23 +114,21 @@ def _htmlRenderDict(pathParts, statDict, output):
       valuePath = pathParts + (keyStr,)
       if isinstance(value, scales.StatContainer) and value.isCollapsed():
         link = '/status/' + '/'.join(valuePath)
-        links.append('<tr><td colspan="2" class="key"><a href="%s">%s</a></td></tr>' % (link, keyStr))
+        links.append('<div class="key"><a href="%s">%s</a></div>' % (link, keyStr))
       else:
-        output.write('<tr><td colspan="2" class="key">%s</td></tr><tr><td colspan="2" style="padding-left: 20px">' %
-                     keyStr)
+        output.write('<div class="key">%s</div>' % keyStr)
         _htmlRenderDict(valuePath, value, output)
-        output.write('</td></tr>')
     else:
       if hasattr(value, '__call__'):
         value = value()
-      output.write('<tr><td class="key">%s</td><td class="%s">%s</td></tr>' %
+      output.write('<div><span class="key">%s</span> <span class="%s">%s</span></div>' %
                    (keyStr, type(value).__name__, cgi.escape(str(value)).replace('\n', '<br>')))
 
   if links:
     for link in links:
       output.write(link)
 
-  output.write('</table>')
+  output.write('</div>')
 
 
 def jsonFormat(output, statDict = None, query = None, pretty = False):
