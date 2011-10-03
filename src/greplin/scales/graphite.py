@@ -80,7 +80,8 @@ class GraphitePeriodicPusher(threading.Thread):
           if not rule(name, value):
             break
         else:
-          self.graphite.log(prefix + self._sanitize(name), value)
+          if type(value) in [int, long, float] and len(name) < 500:
+            self.graphite.log(prefix + self._sanitize(name), value)
 
 
   def doNotLog(self, prefix = None):
