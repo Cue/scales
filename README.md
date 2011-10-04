@@ -127,15 +127,17 @@ class Handler(object):
 
   requests = scales.IntStat('requests')
   latency = scales.PmfStat('latency')
+  byPath = scales.IntDictStat('byPath')
 
   def __init__(self):
     scales.init(self, '/handler')
 
 
   def handleRequest(self, request):
-    self.requests += 1
     with self.latency.time():
       doSomething()
+    self.success += 1
+    self.byPath[request.path] += 1
 ```
 
 
