@@ -125,7 +125,7 @@ a unique identifier with `scales.init`.
 ```python
 class Handler(object):
 
-  success = scales.IntStat('requests')
+  requests = scales.IntStat('requests')
   latency = scales.PmfStat('latency')
 
   def __init__(self):
