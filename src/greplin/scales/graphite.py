@@ -23,17 +23,12 @@ import time
 
 
 
-class GraphitePeriodicPusher(threading.Thread):
-  """A thread that periodically pushes all stat values to Graphite."""
-
-  def __init__(self, host, port, prefix, period=60):
+class GraphitePusher(object):
+  """A class that pushes all stat values to Graphite on-demand."""
+  def __init__(self, host, port, prefix):
     """If prefix is given, it will be prepended to all Graphite
     stats. If it is not given, then a prefix will be derived from the
     hostname."""
-    threading.Thread.__init__(self)
-    self.daemon = True
-
-    self.period = period
     self.forbidden = set()
     self.rules = []
 
@@ -46,20 +41,12 @@ class GraphitePeriodicPusher(threading.Thread):
     self.graphite = util.GraphiteReporter(host, port)
 
 
-  def run(self):
-    """Loop forever, pushing out stats."""
-    self.graphite.start()
-    while True:
-      time.sleep(self.period)
-      self._push()
-
-
   def _sanitize(self, name):
     """Sanitize a name for graphite."""
     return name.strip().replace(' ', '-').replace('.', '-')
 
 
-  def _push(self, statsDict=None, prefix=None, path=None):
+  def push(self, statsDict=None, prefix=None, path=None):
     """Push stat values out to Graphite."""
     if statsDict is None:
       statsDict = scales.getStats()
@@ -72,7 +59,7 @@ class GraphitePeriodicPusher(threading.Thread):
       if subpath in self.forbidden:
         continue
       if hasattr(value, 'iteritems'):
-        self._push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
+        self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
       else:
         if hasattr(value, '__call__'):
           value = value()
@@ -93,3 +80,28 @@ class GraphitePeriodicPusher(threading.Thread):
   def addLogRule(self, rule):
     """Adds a rule function that when given a name and a value, decides whether to log it or not."""
     self.rules.append(rule)
+
+
+
+class GraphitePeriodicPusher(threading.Thread, GraphitePusher):
+  """A thread that periodically pushes all stat values to Graphite."""
+
+  def __init__(self, host, port, prefix, period=60):
+    """If prefix is given, it will be prepended to all Graphite
+    stats. If it is not given, then a prefix will be derived from the
+    hostname."""
+    GraphitePusher.__init__(self, *args, **kwargs)
+    threading.Thread.__init__(self)
+    self.daemon = True
+
+    self.period = period
+
+
+  def run(self):
+    """Loop forever, pushing out stats."""
+    self.graphite.start()
+    while True:
+      time.sleep(self.period)
+      self.push()
+
+
