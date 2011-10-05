@@ -136,7 +136,7 @@ class Handler(object):
   def handleRequest(self, request):
     with self.latency.time():
       doSomething()
-    self.success += 1
+    self.requests += 1
     self.byPath[request.path] += 1
 ```
 
