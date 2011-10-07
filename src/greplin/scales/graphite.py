@@ -25,6 +25,7 @@ import time
 
 class GraphitePusher(object):
   """A class that pushes all stat values to Graphite on-demand."""
+  
   def __init__(self, host, port, prefix):
     """If prefix is given, it will be prepended to all Graphite
     stats. If it is not given, then a prefix will be derived from the
@@ -90,7 +91,7 @@ class GraphitePeriodicPusher(threading.Thread, GraphitePusher):
     """If prefix is given, it will be prepended to all Graphite
     stats. If it is not given, then a prefix will be derived from the
     hostname."""
-    GraphitePusher.__init__(self, *args, **kwargs)
+    GraphitePusher.__init__(self, host, port, prefix)
     threading.Thread.__init__(self)
     self.daemon = True
 
