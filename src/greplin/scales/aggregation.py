@@ -242,7 +242,7 @@ class Sorted(Aggregator):
 
 
   # pylint: disable=W0622
-  def __init__(self, cmp = None, key=None, reverse=False, *args, **kw):
+  def __init__(self, cmp=None, key=None, reverse=False, *args, **kw):
     Aggregator.__init__(self, *args, **kw)
     self.__result = []
     self.__cmp = cmp
@@ -259,6 +259,11 @@ class Sorted(Aggregator):
     """Formats the result."""
     self.__result.sort(cmp = self.__cmp, key = self.__key, reverse = self.__reverse)
     return self.__result
+
+
+  def clone(self):
+    """Creates a clone of this aggregator."""
+    return type(self)(self.__cmp, self.__key, self.__reverse, name = self.name, dataFormat = self._dataFormat)
 
 
 
