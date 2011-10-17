@@ -235,6 +235,33 @@ class InverseMap(Aggregator):
 
 
 
+class Sorted(Aggregator):
+  """Aggregate sorted version of a stat."""
+
+  DEFAULT_NAME = "sorted"
+
+
+  # pylint: disable=W0622
+  def __init__(self, cmp = None, key=None, reverse=False, *args, **kw):
+    Aggregator.__init__(self, *args, **kw)
+    self.__result = []
+    self.__cmp = cmp
+    self.__key = key
+    self.__reverse = reverse
+
+
+  def addValue(self, source, data):
+    """Adds a value from the given source."""
+    self.__result.append((source, self._dataFormat.getValue(data)))
+
+
+  def result(self):
+    """Formats the result."""
+    self.__result.sort(cmp = self.__cmp, key = self.__key, reverse = self.__reverse)
+    return self.__result
+
+
+
 class Highlight(Aggregator):
   """Picks a single value across all sources and highlights it."""
 
