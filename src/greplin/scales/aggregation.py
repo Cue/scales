@@ -101,22 +101,6 @@ class MeterFormat(object):
 
 
 
-class MeterFiveMinRate(object):
-  """A Yammer Metrics Meter datum"""
-
-  def getCount(self, data):
-    """Get the count"""
-    assert data['type'] == "meter"
-    return 1
-
-
-  def getValue(self, data):
-    """Get the value"""
-    assert data['type'] == "meter"
-    return data['m5']
-
-
-
 class GaugeFormat(object):
   """A Yammer Metrics Gauge datum"""
 
@@ -135,7 +119,6 @@ class DataFormats(object):
   TIMER = TimerFormat()
   COUNTER = CounterFormat()
   METER = MeterFormat()
-  METER_FIVE = MeterFiveMinRate()
   GAUGE = GaugeFormat()
 
 
