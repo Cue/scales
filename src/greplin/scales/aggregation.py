@@ -294,7 +294,23 @@ class Aggregation(object):
   """Aggregates stat dictionaries."""
 
   def __init__(self, aggregators):
-    """Creates a stat aggregation object."""
+    """Creates a stat aggregation object from a hierarchical dict representation:
+
+      agg = aggregation.Aggregation({
+        'http_hits' : {
+          '200': [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)],
+          '404': [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)]
+      }})
+
+    Also supports regular expression in aggregations keys:
+
+      agg = aggregation.Aggregation({
+        'http_hits' : {
+          ('ok', re.compile("[1-3][0-9][0-9]")): [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)],
+          ('err', re.compile("[4-5][0-9][0-9]")):  [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)]
+      }})
+
+    """
     self._aggregators = aggregators
     self._result = {}
 
