@@ -294,7 +294,23 @@ class Aggregation(object):
   """Aggregates stat dictionaries."""
 
   def __init__(self, aggregators):
-    """Creates a stat aggregation object."""
+    """Creates a stat aggregation object from a hierarchical dict representation:
+
+      agg = aggregation.Aggregation({
+        'http_hits' : {
+          '200': [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)],
+          '404': [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)]
+      }})
+
+    Also supports regular expression in aggregations keys:
+
+      agg = aggregation.Aggregation({
+        'http_hits' : {
+          ('ok', re.compile("[1-3][0-9][0-9]")): [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)],
+          ('err', re.compile("[4-5][0-9][0-9]")):  [aggregation.Sum(dataFormat=aggregation.DataFormats.DIRECT)]
+      }})
+
+    """
     self._aggregators = aggregators
     self._result = {}
 
@@ -333,13 +349,20 @@ class Aggregation(object):
     if hasattr(aggregators, 'iteritems'):
       # Keep walking the tree.
       for key, value in aggregators.iteritems():
-        if key == '*':
+        if isinstance(key, tuple):
+          key, regex = key
           for dataKey, dataValue in data.iteritems():
-            result.setdefault(dataKey, {})
-            self._aggregate(source, value, dataValue, result[dataKey])
-        elif key in data:
-          result.setdefault(key, {})
-          self._aggregate(source, value, data[key], result[key])
+            if regex.match(dataKey):
+              result.setdefault(key, {})
+              self._aggregate(source, value, dataValue, result[key])
+        else:
+          if key == '*':
+            for dataKey, dataValue in data.iteritems():
+              result.setdefault(dataKey, {})
+              self._aggregate(source, value, dataValue, result[dataKey])
+          elif key in data:
+            result.setdefault(key, {})
+            self._aggregate(source, value, data[key], result[key])
 
     else:
       # We found a leaf.

@@ -14,6 +14,8 @@
 
 """Stat aggregation tests."""
 
+import re
+
 from greplin.scales import aggregation
 
 import unittest
@@ -33,6 +35,18 @@ class AggregationTest(unittest.TestCase):
     agg.addSource('source1', {'a': {}})
     agg.result()
 
+
+  def testRegex(self):
+    "Test regexes in aggregation keys"
+    agg = aggregation.Aggregation({
+        'a' : {
+            ('success', re.compile("[1-3][0-9][0-9]")):  [aggregation.Sum(dataFormat = aggregation.DataFormats.DIRECT)],
+            ('error', re.compile("[4-5][0-9][0-9]")):  [aggregation.Sum(dataFormat = aggregation.DataFormats.DIRECT)]
+        }})
+    agg.addSource('source1', {'a': {'200': 10, '302': 10, '404': 1, '500': 3}})
+    result = agg.result()
+    self.assertEquals(result['a']['success']['sum'], 20)
+    self.assertEquals(result['a']['error']['sum'], 4)
 
 
 
