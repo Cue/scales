@@ -333,13 +333,20 @@ class Aggregation(object):
     if hasattr(aggregators, 'iteritems'):
       # Keep walking the tree.
       for key, value in aggregators.iteritems():
-        if key == '*':
+        if isinstance(key, tuple):
+          key, regex = key
           for dataKey, dataValue in data.iteritems():
-            result.setdefault(dataKey, {})
-            self._aggregate(source, value, dataValue, result[dataKey])
-        elif key in data:
-          result.setdefault(key, {})
-          self._aggregate(source, value, data[key], result[key])
+            if regex.match(dataKey):
+              result.setdefault(key, {})
+              self._aggregate(source, value, dataValue, result[key])
+        else:
+          if key == '*':
+            for dataKey, dataValue in data.iteritems():
+              result.setdefault(dataKey, {})
+              self._aggregate(source, value, dataValue, result[dataKey])
+          elif key in data:
+            result.setdefault(key, {})
+            self._aggregate(source, value, data[key], result[key])
 
     else:
       # We found a leaf.
