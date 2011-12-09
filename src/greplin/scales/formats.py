@@ -110,6 +110,8 @@ def _htmlRenderDict(pathParts, statDict, output):
   for key in keys:
     keyStr = cgi.escape(str(key))
     value = statDict[key]
+    if hasattr(value, '__call__'):
+      value = value()
     if hasattr(value, 'keys'):
       valuePath = pathParts + (keyStr,)
       if isinstance(value, scales.StatContainer) and value.isCollapsed():
@@ -119,8 +121,6 @@ def _htmlRenderDict(pathParts, statDict, output):
         output.write('<div class="key">%s</div>' % keyStr)
         _htmlRenderDict(valuePath, value, output)
     else:
-      if hasattr(value, '__call__'):
-        value = value()
       output.write('<div><span class="key">%s</span> <span class="%s">%s</span></div>' %
                    (keyStr, type(value).__name__, cgi.escape(str(value)).replace('\n', '<br>')))
 
