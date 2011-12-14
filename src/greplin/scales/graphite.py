@@ -19,6 +19,7 @@ from greplin.scales import util
 
 import os
 import threading
+import logging
 import time
 
 
@@ -63,7 +64,11 @@ class GraphitePusher(object):
         self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
       else:
         if hasattr(value, '__call__'):
-          value = value()
+          try:
+            value = value()
+          except:                       # pylint: disable=W0702
+            value = None
+            logging.exception('Error when calling stat function for graphite push')
         for rule in self.rules:
           if not rule(name, value):
             break
