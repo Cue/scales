@@ -70,6 +70,11 @@ def getStats():
   return _Stats.stats
 
 
+def setCollapsed(path):
+  """Sets a stat as collapsed."""
+  return _Stats.setCollapsed(path)
+
+
 
 class StatContainer(UserDict):
   """Container of stats.  Also contains configuration of how the container should be displayed."""
@@ -205,6 +210,12 @@ class _Stats(object):
       if stat:
         return stat, parent
       parent = cls.parentMap.get(statsId(parent))
+
+
+  @classmethod
+  def setCollapsed(cls, path):
+    """Collapses a stat."""
+    cls.__getStatContainer(path).setCollapsed(True)
 
 
 
