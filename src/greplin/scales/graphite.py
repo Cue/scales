@@ -21,6 +21,7 @@ import os
 import threading
 import logging
 import time
+from fnmatch import fnmatch
 
 
 
@@ -31,7 +32,6 @@ class GraphitePusher(object):
     """If prefix is given, it will be prepended to all Graphite
     stats. If it is not given, then a prefix will be derived from the
     hostname."""
-    self.forbidden = set()
     self.rules = []
 
     self.prefix = prefix
@@ -48,6 +48,21 @@ class GraphitePusher(object):
     return name.strip().replace(' ', '-').replace('.', '-')
 
 
+  def _forbidden(self, name, value):
+    """Is a stat forbidden? Goes through the rules to find one that
+    applies. Chronologically newer rules are higher-precedence than
+    older ones. If no rule applies, the stat is forbidden by default."""
+    if name[0] == '/':
+      name = name[1:]
+    for rule in reversed(self.rules):
+      if isinstance(rule[1], basestring):
+        if fnmatch(name, rule[1]):
+          return not rule[0]
+      elif rule[1](name, value):
+        return not rule[0]
+    return True # do not log by default
+
+
   def push(self, statsDict=None, prefix=None, path=None):
     """Push stat values out to Graphite."""
     if statsDict is None:
@@ -58,8 +73,7 @@ class GraphitePusher(object):
     for name, value in statsDict.iteritems():
       name = str(name)
       subpath = os.path.join(path, name)
-      if subpath in self.forbidden:
-        continue
+
       if hasattr(value, 'iteritems'):
         self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
       else:
@@ -69,23 +83,34 @@ class GraphitePusher(object):
           except:                       # pylint: disable=W0702
             value = None
             logging.exception('Error when calling stat function for graphite push')
-        for rule in self.rules:
-          if not rule(name, value):
-            break
+        if self._forbidden(subpath, value):
+          break
         else:
           if type(value) in [int, long, float] and len(name) < 500:
             self.graphite.log(prefix + self._sanitize(name), value)
 
 
-  def doNotLog(self, prefix = None):
-    """Do not log stats beginning with prefix."""
-    if prefix:
-      self.forbidden.add(prefix.strip())
+  def _addRule(self, isWhitelist, rule):
+    """Add an (isWhitelist, rule) pair to the rule list."""
+    if isinstance(rule, basestring) or hasattr(rule, '__call__'):
+      self.rules.append((isWhitelist, rule))
+    else:
+      raise TypeError('Graphite logging rules must be glob pattern or callable. Invalid: %r' % rule)
 
 
-  def addLogRule(self, rule):
-    """Adds a rule function that when given a name and a value, decides whether to log it or not."""
-    self.rules.append(rule)
+  def allow(self, rule):
+    """Append a whitelisting rule to the chain. The rule is either a function (called
+    with the stat name and its value, returns True if it matches), or a Bash-style
+    wildcard pattern, such as 'foo.*.bar'."""
+    self._addRule(True, rule)
+
+
+  def forbid(self, rule):
+    """Append a blacklisting rule to the chain. The rule is either a function (called
+    with the stat name and its value, returns True if it matches), or a Bash-style
+    wildcard pattern, such as 'foo.*.bar'."""
+    self._addRule(False, rule)
+    
 
 
 
