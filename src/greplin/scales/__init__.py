@@ -417,8 +417,9 @@ class SumAggregationStat(AggregationStat):
 class HistogramAggregationStat(AggregationStat):
   """A stat that aggregates child stats in to a histogram counting each unique child value."""
 
-  def __init__(self, name):
+  def __init__(self, name, autoDelete = False):
     AggregationStat.__init__(self, name, None)
+    self.autoDelete = autoDelete
 
 
   def _getDefault(self, _):
@@ -430,6 +431,8 @@ class HistogramAggregationStat(AggregationStat):
     histogram = self.__get__(instance, None)
     if oldValue:
       histogram[oldValue] -= 1
+      if self.autoDelete and histogram[oldValue] == 0:
+        del histogram[oldValue]
     if newValue:
       histogram[newValue] += 1
 
