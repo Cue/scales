@@ -69,6 +69,22 @@ class TimerFormat(object):
 
 
 
+class TimerMeanFormat(object):
+  """A Yammer Metrics Timer datum"""
+
+  def getCount(self, data):
+    """Get the count"""
+    assert data['type'] == "timer"
+    return data['rate']['count']
+
+
+  def getValue(self, data):
+    """Get the value"""
+    assert data['type'] == "timer"
+    return data['duration']['mean']
+
+
+
 class CounterFormat(object):
   """A Yammer Metrics Counter datum"""
 
@@ -117,6 +133,7 @@ class DataFormats(object):
   DEFAULT = DefaultFormat()
   DIRECT = DirectFormat()
   TIMER = TimerFormat()
+  TIMER_MEAN = TimerMeanFormat()
   COUNTER = CounterFormat()
   METER = MeterFormat()
   GAUGE = GaugeFormat()
