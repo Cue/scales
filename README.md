@@ -116,6 +116,20 @@ for person in people:
 ```
 
 
+#### Metering Rates
+
+Scales can track 1/5/15 minute averages with `MeterStat`:
+
+```python
+from greplin.scales.meter import MeterStat
+
+STATS = scales.collection('/web', MeterStat('hits'))
+
+def handleRequest(..):
+  STATS.hits.mark() # or .mark(NUMBER), or STATS.hits = NUMBER
+```
+
+
 #### Class Stats
 
 While global stats are easy to use, sometimes making stats class-based makes
