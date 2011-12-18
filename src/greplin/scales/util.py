@@ -15,6 +15,7 @@
 """Useful utility functions and objects."""
 
 from Queue import Queue
+from math import exp
 import random
 import socket
 import threading
@@ -147,3 +148,86 @@ class GraphiteReporter(threading.Thread):
     """Shut down the background thread."""
     self.queue.put(None)
     self.flush()
+
+
+
+class AtomicValue(object):
+  """Stores a value, atomically"""
+
+
+  def __init__(self, val):
+    self.lock = threading.RLock()
+    self.value = val
+
+
+  def getAndSet(self, newVal):
+    """Sets a new value while returning the old value"""
+    with self.lock:
+      oldVal = self.value
+      self.value = newVal
+      return oldVal
+
+
+  def addAndGet(self, val):
+    """Adds val to the value and returns the result"""
+    with self.lock:
+      self.value += val
+      return self.value
+
+
+
+class EWMA(object):
+  """
+  An exponentially-weighted moving average.
+
+  Ported from Yammer metrics.
+  """
+
+  M1_ALPHA = 1 - exp(-5 / 60.0)
+  M5_ALPHA = 1 - exp(-5 / 60.0 / 5)
+  M15_ALPHA = 1 - exp(-5 / 60.0 / 15)
+
+  TICK_RATE = 5 # Every 5 seconds
+
+
+  @classmethod
+  def oneMinute(cls):
+    """Creates an EWMA configured for a 1 min decay with a 5s tick"""
+    return EWMA(cls.M1_ALPHA, 5)
+
+
+  @classmethod
+  def fiveMinute(cls):
+    """Creates an EWMA configured for a 5 min decay with a 5s tick"""
+    return EWMA(cls.M5_ALPHA, 5)
+
+
+  @classmethod
+  def fifteenMinute(cls):
+    """Creates an EWMA configured for a 15 min decay with a 5s tick"""
+    return EWMA(cls.M15_ALPHA, 5)
+
+
+  def __init__(self, alpha, interval):
+    self.alpha = alpha
+    self.interval = interval
+    self.rate = 0
+    self._uncounted = AtomicValue(0)
+    self._initialized = False
+
+
+  def update(self, val):
+    """Adds this value to the count to be averaged"""
+    self._uncounted.addAndGet(val)
+
+
+  def tick(self):
+    """Updates rates and decays"""
+    count = self._uncounted.getAndSet(0)
+    instantRate = float(count) / self.interval 
+
+    if self._initialized:
+      self.rate += (self.alpha * (instantRate - self.rate))
+    else:
+      self.rate = instantRate
+      self._initialized = True
