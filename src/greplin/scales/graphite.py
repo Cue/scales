@@ -84,7 +84,7 @@ class GraphitePusher(object):
             value = None
             logging.exception('Error when calling stat function for graphite push')
         if self._forbidden(subpath, value):
-          break
+          continue
         else:
           if type(value) in [int, long, float] and len(name) < 500:
             self.graphite.log(prefix + self._sanitize(name), value)
