@@ -29,17 +29,20 @@ Found at http://g-off.net/software/a-python-repeatable-threadingtimer-class
 
 Modified slightly
 """
- 
-from threading import Event, Thread
- 
 
+from threading import Thread
+
+try:
+  from gevent.event import Event
+except:
+  from threading import Event
 
 class RepeatTimer(Thread):
   """A Timer implementation that repeats every interval"""
 
 
   def __init__(self, interval, function, iterations=0, args=None, kwargs=None):
-    Thread.__init__(self)
+    super(RepeatTimer, self).__init__()
     self.interval = interval
     self.function = function
     self.iterations = iterations
