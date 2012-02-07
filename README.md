@@ -13,6 +13,12 @@ This is a brand new release - issue reports and pull requests are very much appr
 
 ### Installation
 
+You can get a release from PyPI:
+
+    pip install scales
+
+Or you can get it from GitHub:
+
     git clone https://github.com/Greplin/scales
 
     cd scales
