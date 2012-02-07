@@ -16,6 +16,8 @@
 
 from Queue import Queue
 from math import exp
+
+import logging
 import random
 import socket
 import threading
@@ -102,6 +104,7 @@ class GraphiteReporter(threading.Thread):
         self.sock.sendall(msg)
         break
       except socket.error:
+        logging.warning('Graphite connection error', exc_info = True)
         self.disconnect()
         time.sleep(random.uniform(0, 2.0*backoff))
         backoff = min(backoff*2.0, 5.0)
@@ -224,7 +227,7 @@ class EWMA(object):
   def tick(self):
     """Updates rates and decays"""
     count = self._uncounted.getAndSet(0)
-    instantRate = float(count) / self.interval 
+    instantRate = float(count) / self.interval
 
     if self._initialized:
       self.rate += (self.alpha * (instantRate - self.rate))
