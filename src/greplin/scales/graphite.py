@@ -33,6 +33,7 @@ class GraphitePusher(object):
     stats. If it is not given, then a prefix will be derived from the
     hostname."""
     self.rules = []
+    self.pruneRules = []
 
     self.prefix = prefix
 
@@ -48,19 +49,35 @@ class GraphitePusher(object):
     return name.strip().replace(' ', '-').replace('.', '-')
 
 
-  def _forbidden(self, name, value):
+  def _forbidden(self, path, value):
     """Is a stat forbidden? Goes through the rules to find one that
     applies. Chronologically newer rules are higher-precedence than
     older ones. If no rule applies, the stat is forbidden by default."""
-    if name[0] == '/':
-      name = name[1:]
+    if path[0] == '/':
+      path = path[1:]
     for rule in reversed(self.rules):
       if isinstance(rule[1], basestring):
-        if fnmatch(name, rule[1]):
+        if fnmatch(path, rule[1]):
           return not rule[0]
-      elif rule[1](name, value):
+      elif rule[1](path, value):
         return not rule[0]
     return True # do not log by default
+
+
+  def _pruned(self, path):
+    """Is a stat tree node pruned?  Goes through the list of prune rules
+    to find one that applies.  Chronologically newer rules are
+    higher-precedence than older ones. If no rule applies, the stat is
+    not pruned by default."""
+    if path[0] == '/':
+      path = path[1:]
+    for rule in reversed(self.pruneRules):
+      if isinstance(rule, basestring):
+        if fnmatch(path, rule):
+          return True
+      elif rule(path):
+        return True
+    return False # Do not prune by default
 
 
   def push(self, statsDict=None, prefix=None, path=None):
@@ -74,6 +91,9 @@ class GraphitePusher(object):
       name = str(name)
       subpath = os.path.join(path, name)
 
+      if self._pruned(subpath):
+        continue
+
       if hasattr(value, 'iteritems'):
         self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
       else:
@@ -85,9 +105,8 @@ class GraphitePusher(object):
             logging.exception('Error when calling stat function for graphite push')
         if self._forbidden(subpath, value):
           continue
-        else:
-          if type(value) in [int, long, float] and len(name) < 500:
-            self.graphite.log(prefix + self._sanitize(name), value)
+        elif type(value) in [int, long, float] and len(name) < 500:
+          self.graphite.log(prefix + self._sanitize(name), value)
 
 
   def _addRule(self, isWhitelist, rule):
@@ -112,6 +131,11 @@ class GraphitePusher(object):
     self._addRule(False, rule)
 
 
+  def prune(self, rule):
+    """Append a rule that stops traversal at a branch node."""
+    self.pruneRules.append(rule)
+
+
 
 class GraphitePeriodicPusher(threading.Thread, GraphitePusher):
   """A thread that periodically pushes all stat values to Graphite."""
@@ -134,5 +158,9 @@ class GraphitePeriodicPusher(threading.Thread, GraphitePusher):
       logging.info('Graphite pusher is sleeping for %d seconds', self.period)
       time.sleep(self.period)
       logging.info('Pushing stats to Graphite')
-      self.push()
-      logging.info('Done pushing stats to Graphite')
+      try:
+        self.push()
+        logging.info('Done pushing stats to Graphite')
+      except:
+        logging.exception('Exception while pushing stats to Graphite')
+        raise
