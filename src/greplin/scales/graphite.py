@@ -27,7 +27,7 @@ from fnmatch import fnmatch
 
 class GraphitePusher(object):
   """A class that pushes all stat values to Graphite on-demand."""
-  
+
   def __init__(self, host, port, prefix):
     """If prefix is given, it will be prepended to all Graphite
     stats. If it is not given, then a prefix will be derived from the
@@ -110,7 +110,6 @@ class GraphitePusher(object):
     with the stat name and its value, returns True if it matches), or a Bash-style
     wildcard pattern, such as 'foo.*.bar'."""
     self._addRule(False, rule)
-    
 
 
 
@@ -132,7 +131,8 @@ class GraphitePeriodicPusher(threading.Thread, GraphitePusher):
     """Loop forever, pushing out stats."""
     self.graphite.start()
     while True:
+      logging.info('Graphite pusher is sleeping for %d seconds', self.period)
       time.sleep(self.period)
+      logging.info('Pushing stats to Graphite')
       self.push()
-
-
+      logging.info('Done pushing stats to Graphite')
