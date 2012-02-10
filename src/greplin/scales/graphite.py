@@ -87,7 +87,7 @@ class GraphitePusher(object):
     prefix = prefix or self.prefix
     path = path or '/'
 
-    for name, value in statsDict.iteritems():
+    for name, value in statsDict.items():
       name = str(name)
       subpath = os.path.join(path, name)
 
