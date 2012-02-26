@@ -20,16 +20,13 @@ from greplin.scales.timer import RepeatTimer
 from greplin.scales.util import EWMA
 
 TICKERS = []
-TICKER_THREAD = RepeatTimer(5, lambda: [ t() for t in TICKERS ])
-TICKER_THREAD.setDaemon(True)
-TICKER_THREAD.start()
-
+TICKER_THREAD = RepeatTimer(5, lambda: [t() for t in TICKERS])
 
 
 class MeterStatDict(UserDict):
   """
   Stores the meters for MeterStat
-  
+
   Expects to be ticked every 5 seconds.
   """
 
