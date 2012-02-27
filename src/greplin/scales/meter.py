@@ -23,13 +23,9 @@ TICKERS = []
 TICKER_THREAD = RepeatTimer(5, lambda: [t() for t in TICKERS])
 
 
+
 class MeterStatDict(UserDict):
-  """
-  Stores the meters for MeterStat
-
-  Expects to be ticked every 5 seconds.
-  """
-
+  """Stores the meters for MeterStat. Expects to be ticked every 5 seconds."""
 
   def __init__(self):
     UserDict.__init__(self)

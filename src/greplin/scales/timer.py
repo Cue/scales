@@ -1,4 +1,5 @@
 # Copyright (c) 2009 Geoffrey Foster. Portions by the Scales Authors.
+# pylint: disable=W9921, C0103
 #
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation
@@ -23,31 +24,27 @@
 
 
 """
-A Timer implementation that repeats every interval.
+A Timer implementation that repeats every interval. Vaguely based on
 
-Found at http://g-off.net/software/a-python-repeatable-threadingtimer-class
+http://g-off.net/software/a-python-repeatable-threadingtimer-class
 
 Modified to remove the Event signal as we never intend to cancel it.
-This was done primarily for compatibility with libraries like gevent
+This was done primarily for compatibility with libraries like gevent.
 """
 
 from thread import start_new_thread
 from time import sleep
 
 
-def RepeatTimer(interval, function, iterations=0, args=None, kwargs=None):
-    def __repeat_timer(interval, function, iterations=0, args=None, kwargs=None):
-        interval = interval
-        function = function
-        iterations = iterations
-        args = args or []
-        kwargs = kwargs or {}
+def RepeatTimer(interval, function, iterations=0, *args, **kwargs):
+  """Repeating timer. Returns a thread id."""
 
-        count = 0
-        while iterations <= 0 or count < iterations:
-            sleep(interval)
-            function(*args, **kwargs)
-            count += 1
+  def __repeat_timer(interval, function, iterations, args, kwargs):
+    """Inner function, run in background thread."""
+    count = 0
+    while iterations <= 0 or count < iterations:
+      sleep(interval)
+      function(*args, **kwargs)
+      count += 1
 
-    ident = start_new_thread(__repeat_timer, (interval, function, iterations, args, kwargs))
-    return ident
+  return start_new_thread(__repeat_timer, (interval, function, iterations, args, kwargs))
