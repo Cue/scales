@@ -122,7 +122,7 @@ def _htmlRenderDict(pathParts, statDict, output):
         _htmlRenderDict(valuePath, value, output)
     else:
       output.write('<div><span class="key">%s</span> <span class="%s">%s</span></div>' %
-                   (keyStr, type(value).__name__, cgi.escape(str(value)).replace('\n', '<br>')))
+                   (keyStr, type(value).__name__, cgi.escape(str(value)).replace('\n', '<br/>')))
 
   if links:
     for link in links:
@@ -136,6 +136,6 @@ def jsonFormat(output, statDict = None, query = None, pretty = False):
   statDict = statDict or scales.getStats()
   if query:
     statDict = runQuery(statDict, query)
-  indent = (pretty and 2) or None
+  indent = 2 if pretty else None
   json.dump(statDict, output, cls=scales.StatContainerEncoder, indent=indent)
   output.write('\n')
