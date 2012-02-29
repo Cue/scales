@@ -30,11 +30,7 @@ def lookup(source, keys, fallback = None):
     for key in keys:
       source = source[key]
     return source
-  except KeyError:
-    return fallback
-  except AttributeError:
-    return fallback
-  except TypeError:
+  except (KeyError, AttributeError, TypeError):
     return fallback
 
 
