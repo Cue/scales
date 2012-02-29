@@ -151,27 +151,29 @@ class GraphiteReporter(threading.Thread):
 
 
 class AtomicValue(object):
-  """Stores a value, atomically"""
-
+  """Stores a value, atomically."""
 
   def __init__(self, val):
     self.lock = threading.RLock()
     self.value = val
 
 
+  def update(self, function):
+    """Atomically apply function to the value, and return the old and new values."""
+    with self.lock:
+      oldValue = self.value
+      self.value = function(oldValue)
+      return oldValue, self.value
+
+
   def getAndSet(self, newVal):
     """Sets a new value while returning the old value"""
-    with self.lock:
-      oldVal = self.value
-      self.value = newVal
-      return oldVal
+    return self.update(lambda _: newVal)[0]
 
 
   def addAndGet(self, val):
     """Adds val to the value and returns the result"""
-    with self.lock:
-      self.value += val
-      return self.value
+    return self.update(lambda x: x + val)[1]
 
 
 
