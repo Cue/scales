@@ -108,7 +108,7 @@ def _htmlRenderDict(pathParts, statDict, output):
 
   output.write('<div class="level">')
   for key in keys:
-    keyStr = cgi.escape(str(key))
+    keyStr = cgi.escape(_utf8str(key))
     value = statDict[key]
     if hasattr(value, '__call__'):
       value = value()
@@ -122,13 +122,22 @@ def _htmlRenderDict(pathParts, statDict, output):
         _htmlRenderDict(valuePath, value, output)
     else:
       output.write('<div><span class="key">%s</span> <span class="%s">%s</span></div>' %
-                   (keyStr, type(value).__name__, cgi.escape(str(value)).replace('\n', '<br/>')))
+                   (keyStr, type(value).__name__, cgi.escape(_utf8str(value)).replace('\n', '<br/>')))
 
   if links:
     for link in links:
       output.write(link)
 
   output.write('</div>')
+
+
+def _utf8str(x):
+  """Like str(x), but returns UTF8."""
+  if isinstance(x, str):
+    return x
+  if isinstance(x, unicode):
+    return x.encode('utf8')
+  return str(x)
 
 
 def jsonFormat(output, statDict = None, query = None, pretty = False):
@@ -139,3 +148,4 @@ def jsonFormat(output, statDict = None, query = None, pretty = False):
   indent = 2 if pretty else None
   json.dump(statDict, output, cls=scales.StatContainerEncoder, indent=indent)
   output.write('\n')
+
