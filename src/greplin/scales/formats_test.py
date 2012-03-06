@@ -17,8 +17,13 @@
 from greplin import scales
 from greplin.scales import formats
 
-import StringIO
+from StringIO import StringIO
 import unittest
+
+try:
+  import simplejson as json
+except ImportError:
+  import json
 
 
 
@@ -60,7 +65,31 @@ class StatsTest(unittest.TestCase):
     r.getChild('here', False).countStat += 1
     r.getChild('not', True).countStat += 100
 
-    out = StringIO.StringIO()
+    out = StringIO()
     formats.jsonFormat(out)
 
     self.assertEquals('{"here": {"count": 1}}\n', out.getvalue())
+
+
+
+class UnicodeFormatTest(unittest.TestCase):
+  """Test cases for Unicode stat formatting."""
+
+  UNICODE_VALUE = u'\u842c\u77e5\u5802'
+
+
+  def testHtmlFormat(self):
+    """Test generating HTML with Unicode values."""
+    out = StringIO()
+    formats.htmlFormat(out, statDict={'name': self.UNICODE_VALUE})
+    result = out.getvalue()
+    self.assertTrue(self.UNICODE_VALUE.encode('utf8') in result)
+
+
+  def testJsonFormat(self):
+    """Test generating JSON with Unicode values."""
+    out = StringIO()
+    stats = {'name': self.UNICODE_VALUE}
+    formats.jsonFormat(out, statDict=stats)
+    result = out.getvalue()
+    self.assertEquals(stats, json.loads(result))
