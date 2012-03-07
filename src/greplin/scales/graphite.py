@@ -22,32 +22,35 @@ import threading
 import logging
 import time
 from fnmatch import fnmatch
-
+from socket import gethostname
+import string
 
 
 class GraphitePusher(object):
   """A class that pushes all stat values to Graphite on-demand."""
 
-  def __init__(self, host, port, prefix):
+  translation = string.maketrans("/ .", "#_-")
+
+  def __init__(self, host, port, prefix=None):
     """If prefix is given, it will be prepended to all Graphite
     stats. If it is not given, then a prefix will be derived from the
     hostname."""
     self.rules = []
     self.pruneRules = []
 
-    self.prefix = prefix
+    self.prefix = prefix if prefix else gethostname().lower()
 
     if self.prefix and self.prefix[-1] != '.':
       self.prefix += '.'
 
-    self.oldPrefix = None
+    print self.prefix
+
     self.graphite = util.GraphiteReporter(host, port)
 
 
   def _sanitize(self, name):
     """Sanitize a name for graphite."""
-    return name.strip().replace(' ', '-').replace('.', '-')
-
+    return name.strip().translate(GraphitePusher.translation)
 
   def _forbidden(self, path, value):
     """Is a stat forbidden? Goes through the rules to find one that
@@ -140,7 +143,7 @@ class GraphitePusher(object):
 class GraphitePeriodicPusher(threading.Thread, GraphitePusher):
   """A thread that periodically pushes all stat values to Graphite."""
 
-  def __init__(self, host, port, prefix, period=60):
+  def __init__(self, host, port, prefix=None, period=60):
     """If prefix is given, it will be prepended to all Graphite
     stats. If it is not given, then a prefix will be derived from the
     hostname."""
