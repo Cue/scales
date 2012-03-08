@@ -46,7 +46,7 @@ class GraphitePusher(object):
 
   def _sanitize(self, name):
     """Sanitize a name for graphite."""
-    return name.strip().replace(' ', '-').replace('.', '-')
+    return name.strip().replace(' ', '-').replace('.', '-').replace('/', '_')
 
 
   def _forbidden(self, path, value):
