@@ -79,3 +79,29 @@ class MeterStat(Stat):
   def __set__(self, instance, value):
     self.__get__(instance, None).mark(value)
 
+
+
+class MeterDict(UserDict):
+  """Dictionary of meters."""
+
+  def __init__(self, parent, instance):
+    UserDict.__init__(self)
+    self.parent = parent
+    self.instance = instance
+
+
+  def __getitem__(self, item):
+    if item in self:
+      return UserDict.__getitem__(self, item)
+    else:
+      meter = MeterStatDict()
+      self[item] = meter
+      return meter
+
+
+
+class MeterDictStat(Stat):
+  """Dictionary stat value class."""
+
+  def _getDefault(self, instance):
+    return MeterDict(self, instance)
