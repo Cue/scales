@@ -241,6 +241,11 @@ class Stat(object):
     return container[self.__name]
 
 
+  def _getInit(self):
+    """Internal method to return the initial value for a stat that is never set."""
+    return self.__default
+
+
   def _getDefault(self, _):
     """Internal method to return the default for a stat that hasn't stored a value yet."""
     return self.__default
@@ -703,7 +708,7 @@ def collection(path, *stats):
   newClass = type('Stats:%s' % path, (object,), attributes)
   instance = newClass()
   for stat in stats:
-    default = stat._getDefault(instance) # Consider this method package-protected. # pylint: disable=W0212
+    default = stat._getInit() # Consider this method package-protected. # pylint: disable=W0212
     if default:
       setattr(instance, stat.getName(), default)
   return instance
