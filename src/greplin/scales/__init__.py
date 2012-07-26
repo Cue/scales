@@ -697,8 +697,13 @@ def collection(path, *stats):
     """Init method for the underlying stat object's class."""
     init(self, path)
 
-  attrs = {'__init__': initMethod}
+  attributes = {'__init__': initMethod}
   for stat in stats:
-    attrs[stat.getName()] = stat
-  newClass = type('Stats:%s' % path, (object,), attrs)
-  return newClass()
+    attributes[stat.getName()] = stat
+  newClass = type('Stats:%s' % path, (object,), attributes)
+  instance = newClass()
+  for stat in stats:
+    default = stat._getDefault(instance) # Consider this method package-protected. # pylint: disable=W0212
+    if default:
+      setattr(instance, stat.getName(), default)
+  return instance
