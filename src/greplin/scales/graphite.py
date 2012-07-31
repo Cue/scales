@@ -94,19 +94,19 @@ class GraphitePusher(object):
       if self._pruned(subpath):
         continue
 
+      if hasattr(value, '__call__'):
+        try:
+          value = value()
+        except:                       # pylint: disable=W0702
+          value = None
+          logging.exception('Error when calling stat function for graphite push')
+
       if hasattr(value, 'iteritems'):
         self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
-      else:
-        if hasattr(value, '__call__'):
-          try:
-            value = value()
-          except:                       # pylint: disable=W0702
-            value = None
-            logging.exception('Error when calling stat function for graphite push')
-        if self._forbidden(subpath, value):
-          continue
-        elif type(value) in [int, long, float] and len(name) < 500:
-          self.graphite.log(prefix + self._sanitize(name), value)
+      elif self._forbidden(subpath, value):
+        continue
+      elif type(value) in (int, long, float) and len(name) < 500:
+        self.graphite.log(prefix + self._sanitize(name), value)
 
 
   def _addRule(self, isWhitelist, rule):
