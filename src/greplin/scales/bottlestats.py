@@ -2,7 +2,7 @@
 from cStringIO import StringIO
 
 from greplin import scales
-from greplin.scales import format, util
+from greplin.scales import formats, util
 
 from bottle import abort, request, run, Bottle
 import functools
@@ -16,18 +16,19 @@ def bottlestats(server_name, path=''):
     stat_dict = util.lookup(scales.getStats(), parts)
 
     if stat_dict is None:
-        abort(404)
+        abort(404, "Not Found")
         return
+
     output = StringIO()
     output_format = request.query.get('format', 'html')
     query = request.query.get('query', None)
-    if outputFormat == 'json':
-        formats.jsonFormat(output, statDict, query)
-    elif outputFormat == 'prettyjson':
-        formats.jsonFormat(output, statDict, query, pretty=True)
+    if output_format == 'json':
+        formats.jsonFormat(output, stat_dict, query)
+    elif output_format == 'prettyjson':
+        formats.jsonFormat(output, stat_dict, query, pretty=True)
     else:
         formats.htmlHeader(output, '/' + path, server_name, query)
-        formats.htmlFormat(output, tuple(parts), statDict, query)
+        formats.htmlFormat(output, tuple(parts), stat_dict, query)
 
     return output.getvalue()
 
@@ -39,7 +40,7 @@ def register_stats_handler(app, server_name, prefix='/_stats/'):
         prefix += '/'
     handler = functools.partial(bottlestats, server_name)
 
-    app.get(prefix, callback=bottlestats)
-    app.get(prefix + '<path:path>', callback=bottlestats)
+    app.get(prefix, callback=handler)
+    app.get(prefix + '<path:path>', callback=handler)
 
 
