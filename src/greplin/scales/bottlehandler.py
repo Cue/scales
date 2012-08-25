@@ -32,7 +32,7 @@ def bottlestats(server_name, path=''):
 
     return output.getvalue()
 
-def register_stats_handler(app, server_name, prefix='/_stats/'):
+def register_stats_handler(app, server_name, prefix='/status/'):
     """Register the stats handler with a Flask app, serving routes
     with a given prefix. The prefix defaults to '/_stats/', which is
     generally what you want."""
