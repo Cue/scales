@@ -4,7 +4,7 @@ from cStringIO import StringIO
 from greplin import scales
 from greplin.scales import formats, util
 
-from bottle import abort, request, run, Bottle
+from bottle import abort, request, response, run, Bottle
 import functools
 
 def bottlestats(server_name, path=''):
@@ -23,12 +23,15 @@ def bottlestats(server_name, path=''):
     output_format = request.query.get('format', 'html')
     query = request.query.get('query', None)
     if output_format == 'json':
+        response.content_type = "application/json"
         formats.jsonFormat(output, stat_dict, query)
     elif output_format == 'prettyjson':
         formats.jsonFormat(output, stat_dict, query, pretty=True)
+        response.content_type = "application/json"
     else:
         formats.htmlHeader(output, '/' + path, server_name, query)
         formats.htmlFormat(output, tuple(parts), stat_dict, query)
+        response.content_type = "text/html"
 
     return output.getvalue()
 
