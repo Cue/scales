@@ -12,7 +12,7 @@ def bottlestats(server_name, path=''):
     path = path.lstrip('/')
     parts = path.split('/')
     if not parts[0]:
-        parts = parts[:1]
+        parts = parts[1:]
     stat_dict = util.lookup(scales.getStats(), parts)
 
     if stat_dict is None:
