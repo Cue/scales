@@ -91,5 +91,14 @@ class UnicodeFormatTest(unittest.TestCase):
     out = StringIO()
     stats = {'name': self.UNICODE_VALUE}
     formats.jsonFormat(out, statDict=stats)
-    result = out.getvalue()
-    self.assertEquals(stats, json.loads(result))
+    self.assertEquals(stats, json.loads(out.getvalue()))
+
+
+  def testJsonFormatBinaryGarbage(self):
+    """Make sure that JSON formatting of binary junk does not crash."""
+    out = StringIO()
+    stats = {'garbage': '\xc2\xc2 ROAR!! \0\0'}
+    formats.jsonFormat(out, statDict=stats)
+    self.assertEquals(json.loads(out.getvalue()), {u'garbage': u'\xc2\xc2 ROAR!! \0\0'})
+
+

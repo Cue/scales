@@ -146,6 +146,13 @@ def jsonFormat(output, statDict = None, query = None, pretty = False):
   if query:
     statDict = runQuery(statDict, query)
   indent = 2 if pretty else None
-  json.dump(statDict, output, cls=scales.StatContainerEncoder, indent=indent)
+  # At first, assume that strings are in UTF-8. If this fails -- if, for example, we have
+  # crazy binary data -- then in order to get *something* out, we assume ISO-8859-1,
+  # which maps each byte to a unicode code point.
+  try:
+    serialized = json.dumps(statDict, cls=scales.StatContainerEncoder, indent=indent)
+  except UnicodeDecodeError:
+    serialized = json.dumps(statDict, cls=scales.StatContainerEncoder, indent=indent, encoding='iso-8859-1')
+  output.write(serialized)
   output.write('\n')
 
