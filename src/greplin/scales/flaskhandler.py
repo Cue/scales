@@ -33,8 +33,7 @@ def statsHandler(serverName, path=''):
   statDict = util.lookup(scales.getStats(), parts)
 
   if statDict is None:
-    abort(404)
-    return
+    abort(404, 'No stats found with path /%s' % '/'.join(parts))
 
   output = StringIO()
   outputFormat = request.args.get('format', 'html')
