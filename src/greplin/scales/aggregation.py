@@ -15,6 +15,7 @@
 """Utilities for multi-server stat aggregation."""
 
 from collections import defaultdict
+import datetime
 try:
   # Prefer simplejson for speed.
   import simplejson as json
@@ -401,3 +402,31 @@ class Aggregation(object):
           result[key] = self.result(value)
       return result
 
+
+
+class FileInclusionTest(object):
+  """Object to help create good file inclusion tests."""
+
+  def __init__(self, ignoreByName = None, maxAge = None):
+    self.ignoreByName = ignoreByName
+    self.maxAge = maxAge
+
+
+  def __call__(self, _, fullPath):
+    """Tests if a file should be included in the aggregation."""
+    try:
+      # Ignore incoming files
+      if self.ignoreByName and self.ignoreByName(fullPath):
+        return False
+
+      # Ignore old, dead files.
+      if self.maxAge:
+        stat = os.stat(fullPath)
+        age = datetime.datetime.now() - datetime.datetime.fromtimestamp(stat.st_mtime)
+        if age > self.maxAge:
+          return False
+
+      return True
+
+    except: # pylint: disable=W0702
+      return False
