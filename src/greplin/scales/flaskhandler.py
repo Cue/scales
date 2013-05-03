@@ -15,6 +15,7 @@
 """Defines a Flask request handler for status reporting."""
 
 
+from copy import deepcopy
 from greplin import scales
 from greplin.scales import formats, util
 
@@ -31,7 +32,7 @@ def statsHandler(serverName, path=''):
   if not parts[0]:
     parts = parts[1:]
   # Deep copy - stats often change *during* output and raise a 'dicationary changed size during iteration' exception.
-  statDict = util.deepdict(util.lookup(scales.getStats(), parts))
+  statDict = deepcopy(util.lookup(scales.getStats(), parts))
 
   if statDict is None:
     abort(404, 'No stats found with path /%s' % '/'.join(parts))

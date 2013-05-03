@@ -16,21 +16,12 @@
 
 from Queue import Queue
 from math import exp
-from UserDict import UserDict
 
 import logging
 import random
 import socket
 import threading
 import time
-
-
-def deepdict(x):
-  """Given a tree of dicts and other things, copy them."""
-  if isinstance(x, (dict, UserDict)):
-    return {k : deepdict(v) for k, v in x.items()}
-  else:
-    return x
 
 
 def lookup(source, keys, fallback = None):
