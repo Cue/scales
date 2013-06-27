@@ -57,4 +57,4 @@ class StatsHandler(tornado.web.RequestHandler):
       formats.htmlHeader(self, '/' + path, self.serverName, query)
       formats.htmlFormat(self, tuple(parts), statDict, query)
 
-    return ''
+    return None
