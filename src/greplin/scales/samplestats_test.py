@@ -18,8 +18,6 @@ from greplin.scales.samplestats import UniformSample
 import random
 import unittest
 
-
-
 class UniformSampleTest(unittest.TestCase):
   """Test cases for uniform sample stats."""
 
