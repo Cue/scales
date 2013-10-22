@@ -81,12 +81,16 @@ in. Graphite is a server for collecting stats and graphing them, and scales has
 easy support for using it. Again, this is handled in a background thread:
 
 ```python
-graphite.GraphitePeriodicPusher('graphite-collector-hostname', 2003, 'my.server.prefix.').start()
+graphitePeriodicPusher = graphite.GraphitePeriodicPusher('graphite-collector-hostname', 2003, 'my.server.prefix.')
+graphitePeriodicPusher.allow("*") # Logs everything to graphite
+graphitePeriodicPusher.start()
 ```
 
-That's it!  Numeric stats will now be pushed to Graphite every minute. You can
-exclude stats from graphite logging with the `doNotLog(prefix)` method of the
-`GraphitePeriodicPusher` class.
+That's it! Numeric stats will now be pushed to Graphite every minute. 
+Note that, by default, if you don't use `allow`, nothing is logged to graphite. 
+
+You can also exclude stats from graphite logging with the `forbid(prefix)` method
+of the `GraphitePeriodicPusher` class.
 
 #### Timing sections of code
 
