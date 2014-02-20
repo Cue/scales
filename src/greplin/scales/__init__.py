@@ -27,7 +27,11 @@ except ImportError:
 import time
 from contextlib import contextmanager
 
-from UserDict import UserDict
+import sys
+if sys.version_info.major >=3:
+  from collections import UserDict
+else:
+  from UserDict import UserDict
 from greplin.scales.samplestats import UniformSample
 
 ID_KEY = '__STATS__id'
