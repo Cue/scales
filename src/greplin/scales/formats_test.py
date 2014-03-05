@@ -17,7 +17,7 @@
 from greplin import scales
 from greplin.scales import formats
 
-from StringIO import StringIO
+import six
 import unittest
 
 try:
@@ -65,7 +65,7 @@ class StatsTest(unittest.TestCase):
     r.getChild('here', False).countStat += 1
     r.getChild('not', True).countStat += 100
 
-    out = StringIO()
+    out = six.StringIO()
     formats.jsonFormat(out)
 
     self.assertEquals('{"here": {"count": 1}}\n', out.getvalue())
@@ -75,20 +75,24 @@ class StatsTest(unittest.TestCase):
 class UnicodeFormatTest(unittest.TestCase):
   """Test cases for Unicode stat formatting."""
 
-  UNICODE_VALUE = u'\u842c\u77e5\u5802'
+  UNICODE_VALUE = '\u842c\u77e5\u5802'
 
 
   def testHtmlFormat(self):
     """Test generating HTML with Unicode values."""
-    out = StringIO()
+    out = six.StringIO()
     formats.htmlFormat(out, statDict={'name': self.UNICODE_VALUE})
     result = out.getvalue()
-    self.assertTrue(self.UNICODE_VALUE.encode('utf8') in result)
+    if six.PY2:
+        value = self.UNICODE_VALUE.encode('utf8')
+    else:
+        value = self.UNICODE_VALUE
+    self.assertTrue(value in result)
 
 
   def testJsonFormat(self):
     """Test generating JSON with Unicode values."""
-    out = StringIO()
+    out = six.StringIO()
     stats = {'name': self.UNICODE_VALUE}
     formats.jsonFormat(out, statDict=stats)
     self.assertEquals(stats, json.loads(out.getvalue()))
@@ -96,9 +100,9 @@ class UnicodeFormatTest(unittest.TestCase):
 
   def testJsonFormatBinaryGarbage(self):
     """Make sure that JSON formatting of binary junk does not crash."""
-    out = StringIO()
+    out = six.StringIO()
     stats = {'garbage': '\xc2\xc2 ROAR!! \0\0'}
     formats.jsonFormat(out, statDict=stats)
-    self.assertEquals(json.loads(out.getvalue()), {u'garbage': u'\xc2\xc2 ROAR!! \0\0'})
+    self.assertEquals(json.loads(out.getvalue()), {'garbage': u'\xc2\xc2 ROAR!! \0\0'})
 
 

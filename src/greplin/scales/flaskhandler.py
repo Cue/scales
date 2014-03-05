@@ -19,7 +19,8 @@ from greplin import scales
 from greplin.scales import formats, util
 
 from flask import request, abort
-from cStringIO import StringIO
+
+from six import StringIO
 
 import functools
 

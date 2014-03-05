@@ -14,7 +14,7 @@
 
 """Useful utility functions and objects."""
 
-from Queue import Queue
+from six.moves import queue
 from math import exp
 
 import logging
@@ -44,7 +44,7 @@ class GraphiteReporter(threading.Thread):
 
     self.host, self.port = host, port
     self.sock = None
-    self.queue = Queue()
+    self.queue = queue.Queue()
     self.maxQueueSize = maxQueueSize
     self.daemon = True
 
@@ -55,7 +55,7 @@ class GraphiteReporter(threading.Thread):
       try:
         try:
           name, value, valueType, stamp = self.queue.get()
-        except TypeError:
+        except:
           break
         self.log(name, value, valueType, stamp)
       finally:
