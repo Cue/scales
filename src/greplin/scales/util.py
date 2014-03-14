@@ -14,7 +14,7 @@
 
 """Useful utility functions and objects."""
 
-from six.moves import queue
+from six.moves.queue import Queue
 from math import exp
 
 import logging
@@ -44,7 +44,7 @@ class GraphiteReporter(threading.Thread):
 
     self.host, self.port = host, port
     self.sock = None
-    self.queue = queue.Queue()
+    self.queue = Queue()
     self.maxQueueSize = maxQueueSize
     self.daemon = True
 

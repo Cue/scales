@@ -44,7 +44,7 @@ def runQuery(statDict, query):
   queryKey = parts[0]
 
   result = {}
-  for key, value in list(statDict.items()):
+  for key, value in six.iteritems(statDict):
     if key == queryKey:
       if len(parts) == 3:
         op = OPERATORS[parts[1]]
@@ -132,14 +132,12 @@ def _htmlRenderDict(pathParts, statDict, output):
 
 def _utf8str(x):
   """Like str(x), but returns UTF8."""
-  if isinstance(x, str):
+  if isinstance(x, six.binary_type):
     return x
-  if isinstance(x, str):
-    try:
-      return x.decode('utf8')
-    except:
-      return x.encode('utf')
-  return str(x)
+  elif isinstance(x, six.text_type):
+    return x.encode('utf-8')
+  else:
+    return six.binary_type(x)
 
 
 def jsonFormat(output, statDict = None, query = None, pretty = False):

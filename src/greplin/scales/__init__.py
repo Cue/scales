@@ -18,6 +18,7 @@ import collections
 import inspect
 import itertools
 import gc
+import six
 import unittest
 try:
   # Prefer simplejson for speed.
@@ -199,7 +200,7 @@ class _Stats(object):
     for theClass in objClass.__mro__:
       if theClass == object:
         break
-      for value in list(theClass.__dict__.values()):
+      for value in list(six.values(theClass.__dict__)):
         if isinstance(value, Stat) and value.getName() == name:
           return value
 
@@ -669,7 +670,7 @@ class StateTimeStat(Stat):
 def filterCollapsedItems(data):
   """Return a filtered iteration over a list of items."""
   return ((key, value)\
-          for key, value in data.items()\
+          for key, value in six.iteritems(data) \
           if not (isinstance(value, StatContainer) and value.isCollapsed()))
 
 
