@@ -14,20 +14,20 @@
 
 """Classes for tracking system statistics."""
 
+import six
 import collections
 import inspect
 import itertools
 import gc
 import unittest
-try:
-  # Prefer simplejson for speed.
-  import simplejson as json
-except ImportError:
-  import json
+from . import jsonhook as json
 import time
 from contextlib import contextmanager
 
-from UserDict import UserDict
+try:
+  from UserDict import UserDict
+except ImportError:
+  from collections import UserDict
 from greplin.scales.samplestats import UniformSample
 
 ID_KEY = '__STATS__id'
@@ -40,7 +40,7 @@ def statsId(obj):
   """Gets a unique ID for each object."""
   if hasattr(obj, ID_KEY):
     return getattr(obj, ID_KEY)
-  newId = NEXT_ID.next()
+  newId = next(NEXT_ID)
   setattr(obj, ID_KEY, newId)
   return newId
 
@@ -666,7 +666,7 @@ class StateTimeStat(Stat):
 def filterCollapsedItems(data):
   """Return a filtered iteration over a list of items."""
   return ((key, value)\
-          for key, value in data.iteritems()\
+          for key, value in six.iteritems(data)\
           if not (isinstance(value, StatContainer) and value.isCollapsed()))
 
 

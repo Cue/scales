@@ -1,5 +1,8 @@
 
-from cStringIO import StringIO
+try:
+  from cStringIO import StringIO
+except:
+  from io import StringIO
 
 from greplin import scales
 from greplin.scales import formats, util

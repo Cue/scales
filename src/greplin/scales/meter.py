@@ -14,7 +14,10 @@
 
 """Classes for metering values"""
 
-from UserDict import UserDict
+try:
+  from UserDict import UserDict
+except ImportError:
+  from collections import UserDict
 from greplin.scales import Stat
 from greplin.scales.timer import RepeatTimer
 from greplin.scales.util import EWMA

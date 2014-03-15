@@ -14,7 +14,10 @@
 
 """Useful utility functions and objects."""
 
-from Queue import Queue
+try:
+  from Queue import Queue
+except ImportError:
+  from queue import Queue
 from math import exp
 
 import logging
