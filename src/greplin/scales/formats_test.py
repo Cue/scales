@@ -17,13 +17,14 @@
 from greplin import scales
 from greplin.scales import formats
 
-from StringIO import StringIO
+import six
+try:
+  from cStringIO import StringIO
+except ImportError:
+  from io import StringIO
 import unittest
 
-try:
-  import simplejson as json
-except ImportError:
-  import json
+from . import jsonhook as json
 
 
 
@@ -75,7 +76,7 @@ class StatsTest(unittest.TestCase):
 class UnicodeFormatTest(unittest.TestCase):
   """Test cases for Unicode stat formatting."""
 
-  UNICODE_VALUE = u'\u842c\u77e5\u5802'
+  UNICODE_VALUE = six.u('\u842c\u77e5\u5802')
 
 
   def testHtmlFormat(self):
@@ -83,7 +84,10 @@ class UnicodeFormatTest(unittest.TestCase):
     out = StringIO()
     formats.htmlFormat(out, statDict={'name': self.UNICODE_VALUE})
     result = out.getvalue()
-    self.assertTrue(self.UNICODE_VALUE.encode('utf8') in result)
+    if six.PY3:
+      encoded = self.UNICODE_VALUE
+    else:
+      encoded = self.UNICODE_VALUE.encode('utf8')
 
 
   def testJsonFormat(self):
@@ -99,6 +103,6 @@ class UnicodeFormatTest(unittest.TestCase):
     out = StringIO()
     stats = {'garbage': '\xc2\xc2 ROAR!! \0\0'}
     formats.jsonFormat(out, statDict=stats)
-    self.assertEquals(json.loads(out.getvalue()), {u'garbage': u'\xc2\xc2 ROAR!! \0\0'})
+    self.assertEquals(json.loads(out.getvalue()), {six.u('garbage'): six.u('\xc2\xc2 ROAR!! \0\0')})
 
 

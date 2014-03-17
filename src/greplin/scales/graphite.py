@@ -17,13 +17,13 @@
 from greplin import scales
 from greplin.scales import util
 
+import six
 import os
 import threading
 import logging
 import time
 from fnmatch import fnmatch
 from socket import gethostname
-
 
 
 class GraphitePusher(object):
@@ -56,7 +56,7 @@ class GraphitePusher(object):
     if path[0] == '/':
       path = path[1:]
     for rule in reversed(self.rules):
-      if isinstance(rule[1], basestring):
+      if isinstance(rule[1], six.string_types):
         if fnmatch(path, rule[1]):
           return not rule[0]
       elif rule[1](path, value):
@@ -72,7 +72,7 @@ class GraphitePusher(object):
     if path[0] == '/':
       path = path[1:]
     for rule in reversed(self.pruneRules):
-      if isinstance(rule, basestring):
+      if isinstance(rule, six.string_types):
         if fnmatch(path, rule):
           return True
       elif rule(path):
@@ -101,17 +101,17 @@ class GraphitePusher(object):
           value = None
           logging.exception('Error when calling stat function for graphite push')
 
-      if hasattr(value, 'iteritems'):
+      if hasattr(value, 'iteritems') or hasattr(value, 'items'):
         self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
       elif self._forbidden(subpath, value):
         continue
-      elif type(value) in (int, long, float) and len(name) < 500:
+      elif isinstance(value, six.integer_types + (float,)) and len(name) < 500:
         self.graphite.log(prefix + self._sanitize(name), value)
 
 
   def _addRule(self, isWhitelist, rule):
     """Add an (isWhitelist, rule) pair to the rule list."""
-    if isinstance(rule, basestring) or hasattr(rule, '__call__'):
+    if isinstance(rule, six.string_types) or hasattr(rule, '__call__'):
       self.rules.append((isWhitelist, rule))
     else:
       raise TypeError('Graphite logging rules must be glob pattern or callable. Invalid: %r' % rule)

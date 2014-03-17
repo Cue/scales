@@ -17,11 +17,7 @@
 from greplin import scales
 
 import cgi
-try:
-  # Prefer simplejson for speed.
-  import simplejson as json
-except ImportError:
-  import json
+from . import jsonhook as json
 import operator
 import re
 
@@ -101,13 +97,10 @@ def htmlFormat(output, pathParts = (), statDict = None, query = None):
 
 def _htmlRenderDict(pathParts, statDict, output):
   """Render a dictionary as a table - recursing as necessary."""
-  keys = statDict.keys()
-  keys.sort()
-
   links = []
 
   output.write('<div class="level">')
-  for key in keys:
+  for key in sorted(list(statDict)):
     keyStr = cgi.escape(_utf8str(key))
     value = statDict[key]
     if hasattr(value, '__call__'):
@@ -135,8 +128,11 @@ def _utf8str(x):
   """Like str(x), but returns UTF8."""
   if isinstance(x, str):
     return x
-  if isinstance(x, unicode):
-    return x.encode('utf8')
+  try:
+    if isinstance(x, unicode):
+      return x.encode('utf8')
+  except NameError: # Missing unicode on Python 3
+    pass
   return str(x)
 
 

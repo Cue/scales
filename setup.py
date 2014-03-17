@@ -35,6 +35,7 @@ setup(name='scales',
       namespace_packages = [
         'greplin',
       ],
+      install_requires=['six'],
       test_suite = 'nose.collector',
       zip_safe = True
 )

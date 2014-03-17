@@ -1,1 +1,1 @@
-simplejson==2.6.1
+six
