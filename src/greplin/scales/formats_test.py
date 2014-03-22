@@ -75,7 +75,7 @@ class StatsTest(unittest.TestCase):
 class UnicodeFormatTest(unittest.TestCase):
   """Test cases for Unicode stat formatting."""
 
-  UNICODE_VALUE = '\u842c\u77e5\u5802'
+  UNICODE_VALUE = six.u('\u842c\u77e5\u5802')
 
 
   def testHtmlFormat(self):
@@ -103,6 +103,6 @@ class UnicodeFormatTest(unittest.TestCase):
     out = six.StringIO()
     stats = {'garbage': '\xc2\xc2 ROAR!! \0\0'}
     formats.jsonFormat(out, statDict=stats)
-    self.assertEquals(json.loads(out.getvalue()), {'garbage': u'\xc2\xc2 ROAR!! \0\0'})
+    self.assertEquals(json.loads(out.getvalue()), {'garbage': six.u('\xc2\xc2 ROAR!! \0\0')})
 
 

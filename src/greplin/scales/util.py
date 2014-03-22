@@ -55,7 +55,7 @@ class GraphiteReporter(threading.Thread):
       try:
         try:
           name, value, valueType, stamp = self.queue.get()
-        except:
+        except TypeError:
           break
         self.log(name, value, valueType, stamp)
       finally:

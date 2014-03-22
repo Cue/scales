@@ -200,7 +200,7 @@ class _Stats(object):
     for theClass in objClass.__mro__:
       if theClass == object:
         break
-      for value in list(theClass.__dict__.values()):
+      for value in theClass.__dict__.values():
         if isinstance(value, Stat) and value.getName() == name:
           return value
 
