@@ -14,7 +14,7 @@
 
 """Useful utility functions and objects."""
 
-from Queue import Queue
+from six.moves.queue import Queue
 from math import exp
 
 import logging

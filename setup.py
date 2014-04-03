@@ -27,6 +27,11 @@ setup(name='scales',
       author='Greplin, Inc.',
       author_email='opensource@greplin.com',
       url='https://www.github.com/Cue/scales',
+      install_requires=[
+        'nose',
+        'simplejson==3.3.3',
+        'six',
+      ],
       package_dir = {'':'src'},
       packages = [
         'greplin',

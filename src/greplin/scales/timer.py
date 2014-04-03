@@ -32,7 +32,7 @@ Modified to remove the Event signal as we never intend to cancel it.
 This was done primarily for compatibility with libraries like gevent.
 """
 
-from thread import start_new_thread
+from six.moves._thread import start_new_thread
 from time import sleep
 
 

@@ -1,1 +1,2 @@
-simplejson==2.6.1
+simplejson==3.3.3
+six==1.5.2

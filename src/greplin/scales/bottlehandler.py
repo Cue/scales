@@ -1,5 +1,5 @@
 
-from cStringIO import StringIO
+from six import StringIO
 
 from greplin import scales
 from greplin.scales import formats, util
