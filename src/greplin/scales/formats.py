@@ -133,6 +133,8 @@ def _htmlRenderDict(pathParts, statDict, output):
 
 def _utf8str(x):
   """Like str(x), but returns UTF8."""
+  if six.PY3:
+    return str(x)
   if isinstance(x, six.binary_type):
     return x
   elif isinstance(x, six.text_type):
