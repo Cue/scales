@@ -28,8 +28,8 @@ import re
 OPERATORS = {
   '>=': operator.ge,
   '>': operator.gt,
-  '<=': operator.lt,
-  '<': operator.le,
+  '<': operator.lt,
+  '<=': operator.le,
   '=': operator.eq,
   '==': operator.eq,
   '!=': operator.ne
