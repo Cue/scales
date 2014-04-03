@@ -105,11 +105,13 @@ class GraphitePusher(object):
         self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
       elif self._forbidden(subpath, value):
         continue
+
       if six.PY3:
         type_values = (int, float)
       else:
         type_values = (int, long, float)
-      elif type(value) in type_values and len(name) < 500:
+
+      if type(value) in type_values and len(name) < 500:
         self.graphite.log(prefix + self._sanitize(name), value)
 
 
