@@ -17,6 +17,7 @@
 from greplin import scales
 
 import cgi
+import six
 try:
   import simplejson as json
 except ImportError:
