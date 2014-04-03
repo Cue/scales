@@ -32,7 +32,7 @@ try:
   from UserDict import UserDict
 except ImportError:
   from collections import UserDict
-from greplin.scales.samplestats import UniformSample
+from greplin.scales.samplestats import ExponentiallyDecayingReservoir
 
 ID_KEY = '__STATS__id'
 
@@ -506,9 +506,12 @@ class PmfStatDict(UserDict):
       self.__discard = True
 
 
-  def __init__(self):
+  def __init__(self, sample = None):
     UserDict.__init__(self)
-    self.__sample = UniformSample()
+    if sample:
+        self.__sample = sample
+    else:
+        self.__sample = ExponentiallyDecayingReservoir()
     self.__timestamp = 0
     self.percentile99 = None
     self['count'] = 0

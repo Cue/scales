@@ -14,11 +14,9 @@
 
 """Sample statistics tests."""
 
-from greplin.scales.samplestats import UniformSample
+from greplin.scales.samplestats import UniformSample, ExponentiallyDecayingReservoir
 import random
 import unittest
-
-
 
 class UniformSampleTest(unittest.TestCase):
   """Test cases for uniform sample stats."""
@@ -38,6 +36,20 @@ class UniformSampleTest(unittest.TestCase):
       us.update(random.gauss(0.0012, 0.00005))
     self.assertAlmostEqual(us.mean, 0.0012015284549517493, places=5)
     self.assertAlmostEqual(us.stddev, 4.9776450250869146e-05, places=5)
+
+
+class ExponentiallyDecayingReservoirTest(unittest.TestCase):
+  """Test cases for exponentially decaying reservoir sample stats."""
+
+  def testGaussian(self):
+    """Test with gaussian random numbers."""
+    random.seed(42)
+
+    sample = ExponentiallyDecayingReservoir()
+    for _ in range(300):
+      sample.update(random.gauss(42.0, 13.0))
+    self.assertAlmostEqual(sample.mean, 41.974069434931714, places=5)
+    self.assertAlmostEqual(sample.stddev, 12.982363860393766, places=5)
 
 
 if __name__ == '__main__':

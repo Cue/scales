@@ -21,7 +21,7 @@ except ImportError:
   from distutils.core import setup
 
 setup(name='scales',
-      version='1.0.4',
+      version='1.0.5',
       description='Stats for Python processes',
       license='Apache',
       author='Greplin, Inc.',
@@ -39,6 +39,9 @@ setup(name='scales',
       ],
       namespace_packages = [
         'greplin',
+      ],
+      tests_require = [
+          'nose',
       ],
       test_suite = 'nose.collector',
       zip_safe = True
