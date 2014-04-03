@@ -1,6 +1,8 @@
 scales - Metrics for Python
 ===========================
 
+[![Travis build status](https://travis-ci.org/Cue/scales.png)](https://travis-ci.org/Cue/scales)
+
 Tracks server state and statistics, allowing you to see what your server is
 doing. It can also send metrics to Graphite for graphing or to a file for crash forensics.
 
@@ -35,6 +37,10 @@ The HTTP statistics viewer in scales requires one of the following web framework
 
 If you aren't sure, go with Flask; it's compatible with most every other event
 loop. You can get it with `pip install flask`.
+
+Scales is tested with Python 2.7 and 3.3. For some reason it does not
+work with PyPy; pull requests for this are welcome, if you can figure
+out what's up.
 
 
 ### How to use it
