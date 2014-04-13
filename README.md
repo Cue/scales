@@ -21,7 +21,7 @@ You can get a release from PyPI:
 
 Or you can get it from GitHub:
 
-    git clone https://github.com/Greplin/scales
+    git clone https://github.com/Cue/scales
 
     cd scales
 
