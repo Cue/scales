@@ -16,11 +16,7 @@
 
 from collections import defaultdict
 import datetime
-try:
-  # Prefer simplejson for speed.
-  import simplejson as json
-except ImportError:
-  import json
+import json
 import os
 import re
 
