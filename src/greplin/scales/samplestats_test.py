@@ -52,5 +52,18 @@ class ExponentiallyDecayingReservoirTest(unittest.TestCase):
     self.assertAlmostEqual(sample.stddev, 12.982363860393766, places=5)
 
 
+  def testWithRescale(self):
+    """Excercise rescaling."""
+    # Not a good test, but at least we cover a little more of the code.
+    random.seed(42)
+
+    sample = ExponentiallyDecayingReservoir(rescale_threshold=-1)
+    sample.update(random.gauss(42.0, 13.0))
+    self.assertAlmostEqual(sample.mean, 40.12682571548693, places=5)
+
+
+
+
+
 if __name__ == '__main__':
   unittest.main()

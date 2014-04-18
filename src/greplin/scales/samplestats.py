@@ -178,7 +178,7 @@ class ExponentiallyDecayingReservoir(Sampler):
       self.nextScaleTime = now + self.rescale_threshold
       oldStartTime = self.startTime;
       self.startTime = self.clock.time()
-      keys = self.values.keys()
+      keys = list(self.values.keys())
       keys.sort()
       delKeys = []
 
