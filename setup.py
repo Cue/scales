@@ -21,7 +21,7 @@ except ImportError:
   from distutils.core import setup
 
 setup(name='scales',
-      version='1.0.5',
+      version='1.0.6',
       description='Stats for Python processes',
       license='Apache',
       author='Greplin, Inc.',
