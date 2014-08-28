@@ -57,12 +57,15 @@ class Sampler(object):
     if len(self) < 2:
       return float('NaN')
     # The stupidest algorithm, but it works fine.
-    arr = self.samples()
-    mean = sum(arr) / len(arr)
-    bigsum = 0.0
-    for x in arr:
-      bigsum += (x - mean)**2
-    return sqrt(bigsum / (len(arr) - 1))
+    try:
+      arr = self.samples()
+      mean = sum(arr) / len(arr)
+      bigsum = 0.0
+      for x in arr:
+        bigsum += (x - mean)**2
+      return sqrt(bigsum / (len(arr) - 1))
+    except ZeroDivisionError:
+      return float('NaN')
 
 
   def percentiles(self, percentiles):
