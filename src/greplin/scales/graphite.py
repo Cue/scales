@@ -101,7 +101,7 @@ class GraphitePusher(object):
           value = None
           logging.exception('Error when calling stat function for graphite push')
 
-      if hasattr(value, 'iteritems'):
+      if hasattr(value, 'items'):
         self.push(value, '%s%s.' % (prefix, self._sanitize(name)), subpath)
       elif self._forbidden(subpath, value):
         continue

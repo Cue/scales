@@ -15,6 +15,7 @@
 """Useful utility functions and objects."""
 
 from six.moves.queue import Queue
+from six import binary_type
 from math import exp
 
 import logging
@@ -94,6 +95,9 @@ class GraphiteReporter(threading.Thread):
     """Send a line to graphite. Retry with exponential backoff."""
     if not self.sock:
       self.connect()
+    if not isinstance(msg, binary_type):
+      msg = msg.encode("UTF-8")
+
     backoff = 0.001
     while True:
       try:
