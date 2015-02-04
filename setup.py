@@ -28,7 +28,6 @@ setup(name='scales',
       author_email='opensource@greplin.com',
       url='https://www.github.com/Cue/scales',
       install_requires=[
-        'simplejson>=3.0.0',
         'six',
       ],
       package_dir = {'':'src'},
