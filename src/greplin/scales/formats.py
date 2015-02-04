@@ -18,10 +18,7 @@ from greplin import scales
 
 import cgi
 import six
-try:
-  import simplejson as json
-except ImportError:
-  import json
+import json
 import operator
 import re
 

@@ -19,11 +19,7 @@ from greplin.scales import formats
 
 import six
 import unittest
-
-try:
-  import simplejson as json
-except ImportError:
-  import json
+import json
 
 
 
