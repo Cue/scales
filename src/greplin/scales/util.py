@@ -24,6 +24,8 @@ import socket
 import threading
 import time
 
+log = logging.getLogger(__name__)
+
 
 def lookup(source, keys, fallback = None):
   """Traverses the source, looking up each key.  Returns None if can't find anything instead of raising an exception."""
@@ -104,7 +106,7 @@ class GraphiteReporter(threading.Thread):
         self.sock.sendall(msg)
         break
       except socket.error:
-        logging.warning('Graphite connection error', exc_info = True)
+        log.warning('Graphite connection error', exc_info = True)
         self.disconnect()
         time.sleep(random.uniform(0, 2.0*backoff))
         backoff = min(backoff*2.0, 5.0)
