@@ -592,7 +592,7 @@ class PmfStat(Stat):
 
 class DoubleStat(Stat):
   """
-    A single stat that stores the a floating point number. Supports using the time() method to measure sections of code.
+    A single stat that stores a floating point number. Supports using the time() method to measure sections of code.
   """
   def __init__(self, name, _=None):
     Stat.__init__(self, name, None)
