@@ -217,7 +217,26 @@ class _Stats(object):
     """Collapses a stat."""
     cls.__getStatContainer(path).setCollapsed(True)
 
+class BaseTimeManager(object):
+  """Context manager for timing."""
 
+  def __init__(self, container):
+      self.container = container
+      self.start = None
+      self.__discard = False
+
+  def __enter__(self):
+      self.start = time.time()
+      return self
+
+  def __exit__(self, *_):
+    if not self.__discard:
+      latency = time.time() - self.start
+      self.container.addValue(latency)
+
+  def discard(self):
+      """Discard this sample."""
+      self.__discard = True
 
 class Stat(object):
   """Basic stat value class."""
@@ -459,12 +478,36 @@ class IntDictSumAggregationStat(ChildAggregationStat):
     histogram = self.__get__(instance, None)
     histogram[subKey] += newValue - oldValue
 
+class StatDict(object, UserDict):
+  TimeManager = BaseTimeManager
+
+  def __init__(self):
+    UserDict.__init__(self)
+    self.__timestamp = 0
+    self['count'] = 0
+
+  def __getitem__(self, item):
+    if item in self:
+      return UserDict.__getitem__(self, item)
+    else:
+      return 0.0
+
+  def addValue(self, value):
+    """Updates the dictionary."""
+    self['count'] += 1
+    if time.time() > self.__timestamp + 20:
+      self.__timestamp = time.time()
+      self['value'] = value
+
+  def time(self):
+    """Measure the time this section of code takes. For use in with statements."""
+    return self.TimeManager(self)
 
 
-class PmfStatDict(UserDict):
+class PmfStatDict(StatDict):
   """Ugly hack defaultdict-like thing."""
 
-  class TimeManager(object):
+  class TimeManager(BaseTimeManager):
     """Context manager for timing."""
 
     def __init__(self, container):
@@ -472,12 +515,6 @@ class PmfStatDict(UserDict):
       self.msg99 = None
       self.start = None
       self.__discard = False
-
-
-    def __enter__(self):
-      self.start = time.time()
-      return self
-
 
     def __exit__(self, *_):
       if not self.__discard:
@@ -496,28 +533,15 @@ class PmfStatDict(UserDict):
       logger.warn(msg, *args) at the end of the section."""
       self.msg99 = (logger, msg, args)
 
-
-    def discard(self):
-      """Discard this sample."""
-      self.__discard = True
-
-
   def __init__(self, sample = None):
-    UserDict.__init__(self)
+    super(PmfStatDict, self).__init__()
+    self.__timestamp = 0
     if sample:
         self.__sample = sample
     else:
         self.__sample = ExponentiallyDecayingReservoir()
-    self.__timestamp = 0
+
     self.percentile99 = None
-    self['count'] = 0
-
-
-  def __getitem__(self, item):
-    if item in self:
-      return UserDict.__getitem__(self, item)
-    else:
-      return 0.0
 
 
   def addValue(self, value):
@@ -530,6 +554,7 @@ class PmfStatDict(UserDict):
       self['max'] = self.__sample.max
       self['mean'] = self.__sample.mean
       self['stddev'] = self.__sample.stddev
+      self['value'] = value
 
       percentiles = self.__sample.percentiles([0.5, 0.75, 0.95, 0.98, 0.99, 0.999])
       self['median'] = percentiles[0]
@@ -564,6 +589,21 @@ class PmfStat(Stat):
   def __set__(self, instance, value):
     self.__get__(instance, None).addValue(value)
 
+
+class DoubleStat(Stat):
+  """
+    A single stat that stores a floating point number. Supports using the time() method to measure sections of code.
+  """
+  def __init__(self, name, _=None):
+    Stat.__init__(self, name, None)
+
+
+  def _getDefault(self, _):
+    return StatDict()
+
+
+  def __set__(self, instance, value):
+    self.__get__(instance, None).addValue(value)
 
 
 class NamedPmfDict(UserDict):

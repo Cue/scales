@@ -1,4 +1,6 @@
 *.egg/
+*.swp
+.idea/
 build/
 dist/
 venv/
