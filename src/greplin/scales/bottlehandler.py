@@ -37,8 +37,7 @@ def bottlestats(server_name, path=''):
 
 def register_stats_handler(app, server_name, prefix='/status/'):
     """Register the stats handler with a Flask app, serving routes
-    with a given prefix. The prefix defaults to '/_stats/', which is
-    generally what you want."""
+    with a given prefix."""
     if not prefix.endswith('/'):
         prefix += '/'
     handler = functools.partial(bottlestats, server_name)
