@@ -15,6 +15,7 @@
 """Classes for tracking system statistics."""
 
 import collections
+import functools
 import inspect
 import itertools
 import gc
@@ -465,7 +466,7 @@ class PmfStatDict(UserDict):
   """Ugly hack defaultdict-like thing."""
 
   class TimeManager(object):
-    """Context manager for timing."""
+    """Context manager for timing. Also works as a function decorator."""
 
     def __init__(self, container):
       self.container = container
@@ -501,6 +502,13 @@ class PmfStatDict(UserDict):
       """Discard this sample."""
       self.__discard = True
 
+    def __call__(self, func):
+      """Decorator mode"""
+      def newFunc(*args, **kw):
+        with self:
+          return func(*args, **kw)
+      functools.update_wrapper(newFunc, func)
+      return newFunc
 
   def __init__(self, sample = None):
     UserDict.__init__(self)
@@ -542,7 +550,15 @@ class PmfStatDict(UserDict):
 
 
   def time(self):
-    """Measure the time this section of code takes. For use in with statements."""
+    """Measure the time this section of code takes. For use in with-
+    statements or as a function decorator.
+
+    Decorator example:
+
+      @STATS.foo.time()
+      def foo():
+          ...
+    """
     return self.TimeManager(self)
 
 
