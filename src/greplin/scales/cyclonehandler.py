@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines a Tornado request handler for status reporting."""
+"""Defines a Cyclone request handler for status reporting.
+
+Install like:
+  handlers=[
+    ...
+    (r'/stats/(.*)', StatsHandler, {'serverName': 'my_app_name'}),
+  ]
+
+"""
 
 
 from greplin.scales import tornadolike
 
-import tornado.web
+import cyclone.web
 
 
-class StatsHandler(tornadolike.Handler, tornado.web.RequestHandler):
-  """Tornado request handler for a status page."""
+class StatsHandler(tornadolike.Handler, cyclone.web.RequestHandler):
+  """Cyclone request handler for a status page."""
