@@ -14,7 +14,7 @@
 
 """Sample statistics. Based on the Java code in Yammer metrics."""
 
-import random
+import random, heapq
 from math import sqrt, floor, exp
 
 from .clock import getClock
@@ -133,6 +133,7 @@ class ExponentiallyDecayingReservoir(Sampler):
     self.count = 0
     self.startTime = self.clock.time()
     self.nextScaleTime = self.clock.time() + self.rescale_threshold
+    self.priorities = []
 
   def __len__(self):
     return min(self.size, self.count)
@@ -152,19 +153,24 @@ class ExponentiallyDecayingReservoir(Sampler):
 
     self.__rescaleIfNeeded()
     priority = self.__weight(timestamp - self.startTime) / random.random()
+    new_counter = self.count + 1
+    self.count = new_counter
 
-    self.count += 1
-    if (self.count <= self.size):
-      self.values[priority] = value
+    if new_counter <= self.size:
+       self.values[priority] = value
+       heapq.heappush(self.priorities, priority)
     else:
-      first = min(self.values)
+       first = heapq.heappop(self.priorities)
+       if first < priority:
+          if priority not in self.values:
+              self.values[priority] = value
+              heapq.heappush(self.priorities, priority)
+              while first not in self.values:
+                 first = heapq.heappop(self.priorities)
 
-      if first < priority and priority not in self.values:
-        self.values[priority] = value
-        while first not in self.values:
-          first = min(self.values)
-
-        del self.values[first]
+              del self.values[first]
+       else:
+           heapq.heappush(self.priorities, first)
 
   def __rescaleIfNeeded(self):
     now = self.clock.time()
@@ -183,17 +189,17 @@ class ExponentiallyDecayingReservoir(Sampler):
       self.startTime = self.clock.time()
       keys = list(self.values.keys())
       keys.sort()
-      delKeys = []
+      new_priorities = []
+      new_values = {}
 
       for key in keys:
         value = self.values[key]
-        delKeys.append(key)
-        newKey = key * _bounded_exp(-self.alpha * (self.startTime - oldStartTime))
-        self.values[newKey] = value
+        priority = key * _bounded_exp(-self.alpha * (self.startTime - oldStartTime))
+        new_values[priority] = value
+        heapq.heappush(new_priorities, priority)
 
-      for key in delKeys:
-        del self.values[key]
-
+      self.values = new_values
+      self.priorities = new_priorities
       self.count = len(self.values)
 
   def samples(self):
