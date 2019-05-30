@@ -607,7 +607,37 @@ class NamedPmfDictStat(Stat):
   def _getDefault(self, _):
     return NamedPmfDict()
 
+class RecentFps(object):
+  def __init__(self, window=20):
+    self.window = window
+    self.recentTimes = []
 
+  def mark(self):
+    now = time.time()
+    self.recentTimes.append(now)
+    self.recentTimes = self.recentTimes[-self.window:]
+
+  def rate(self):
+    def dec(innerFunc):
+      def f(*a, **kw):
+        self.mark()
+        return innerFunc(*a, **kw)
+      return f
+    return dec
+
+  def __call__(self):
+    if len(self.recentTimes) < 2:
+      return {}
+    recents = sorted(round(1 / (b - a), 3)
+                      for a, b in zip(self.recentTimes[:-1],
+                                      self.recentTimes[1:]))
+    avg = (len(self.recentTimes) - 1) / (
+      self.recentTimes[-1] - self.recentTimes[0])
+    return {'average': round(avg, 5), 'recents': recents}
+
+class RecentFpsStat(Stat):
+  def _getDefault(self, _):
+    return RecentFps()
 
 class StateTimeStatDict(UserDict):
   """Special dict that tracks time spent in current state."""
