@@ -510,13 +510,14 @@ class PmfStatDict(UserDict):
       functools.update_wrapper(newFunc, func)
       return newFunc
 
-  def __init__(self, sample = None):
+  def __init__(self, sample = None, recalcPeriod = 20):
     UserDict.__init__(self)
     if sample:
         self.__sample = sample
     else:
         self.__sample = ExponentiallyDecayingReservoir()
     self.__timestamp = 0
+    self.__recalcPeriod = recalcPeriod
     self.percentile99 = None
     self['count'] = 0
 
@@ -532,7 +533,7 @@ class PmfStatDict(UserDict):
     """Updates the dictionary."""
     self['count'] += 1
     self.__sample.update(value)
-    if time.time() > self.__timestamp + 20 and len(self.__sample) > 1:
+    if time.time() > self.__timestamp + self.__recalcPeriod and len(self.__sample) > 1:
       self.__timestamp = time.time()
       self['min'] = self.__sample.min
       self['max'] = self.__sample.max
@@ -569,12 +570,13 @@ class PmfStat(Stat):
   bit expensive, so its child values are only updated once every
   twenty seconds."""
 
-  def __init__(self, name, _=None):
+  def __init__(self, name, _=None, recalcPeriod=20):
     Stat.__init__(self, name, None)
+    self.__recalcPeriod = recalcPeriod
 
 
   def _getDefault(self, _):
-    return PmfStatDict()
+    return PmfStatDict(recalcPeriod=self.__recalcPeriod)
 
 
   def __set__(self, instance, value):
