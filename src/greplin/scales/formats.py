@@ -16,7 +16,11 @@
 
 from greplin import scales
 
-import cgi
+try:
+  import html
+except ImportError:
+  # Python 2.7 has no html module
+  import cgi as html
 import six
 import json
 import operator
@@ -105,7 +109,7 @@ def _htmlRenderDict(pathParts, statDict, output):
 
   output.write('<div class="level">')
   for key in keys:
-    keyStr = cgi.escape(_utf8str(key))
+    keyStr = html.escape(_utf8str(key))
     value = statDict[key]
     if hasattr(value, '__call__'):
       value = value()
@@ -119,7 +123,7 @@ def _htmlRenderDict(pathParts, statDict, output):
         _htmlRenderDict(valuePath, value, output)
     else:
       output.write('<div><span class="key">%s</span> <span class="%s">%s</span></div>' %
-                   (keyStr, type(value).__name__, cgi.escape(_utf8str(value)).replace('\n', '<br/>')))
+                   (keyStr, type(value).__name__, html.escape(_utf8str(value)).replace('\n', '<br/>')))
 
   if links:
     for link in links:
