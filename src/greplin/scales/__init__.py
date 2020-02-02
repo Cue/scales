@@ -635,7 +635,9 @@ class RecentFps(object):
                                       self.recentTimes[1:]))
     avg = (len(self.recentTimes) - 1) / (
       self.recentTimes[-1] - self.recentTimes[0])
-    return {'average': round(avg, 5), 'recents': recents}
+    return {'average': round(avg, 5), 
+            'recents': recents, 
+            'period': round(1 / avg, 1) if avg > 0 else None}
 
 class RecentFpsStat(Stat):
   def _getDefault(self, _):
