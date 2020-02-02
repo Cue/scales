@@ -15,6 +15,7 @@
 """Classes for tracking system statistics."""
 
 import collections
+import functools
 import inspect
 import itertools
 import gc
@@ -465,7 +466,7 @@ class PmfStatDict(UserDict):
   """Ugly hack defaultdict-like thing."""
 
   class TimeManager(object):
-    """Context manager for timing."""
+    """Context manager for timing. Also works as a function decorator."""
 
     def __init__(self, container):
       self.container = container
@@ -501,14 +502,22 @@ class PmfStatDict(UserDict):
       """Discard this sample."""
       self.__discard = True
 
+    def __call__(self, func):
+      """Decorator mode"""
+      def newFunc(*args, **kw):
+        with self:
+          return func(*args, **kw)
+      functools.update_wrapper(newFunc, func)
+      return newFunc
 
-  def __init__(self, sample = None):
+  def __init__(self, sample = None, recalcPeriod = 20):
     UserDict.__init__(self)
     if sample:
         self.__sample = sample
     else:
         self.__sample = ExponentiallyDecayingReservoir()
     self.__timestamp = 0
+    self.__recalcPeriod = recalcPeriod
     self.percentile99 = None
     self['count'] = 0
 
@@ -524,7 +533,7 @@ class PmfStatDict(UserDict):
     """Updates the dictionary."""
     self['count'] += 1
     self.__sample.update(value)
-    if time.time() > self.__timestamp + 20 and len(self.__sample) > 1:
+    if time.time() > self.__timestamp + self.__recalcPeriod and len(self.__sample) > 1:
       self.__timestamp = time.time()
       self['min'] = self.__sample.min
       self['max'] = self.__sample.max
@@ -542,7 +551,15 @@ class PmfStatDict(UserDict):
 
 
   def time(self):
-    """Measure the time this section of code takes. For use in with statements."""
+    """Measure the time this section of code takes. For use in with-
+    statements or as a function decorator.
+
+    Decorator example:
+
+      @STATS.foo.time()
+      def foo():
+          ...
+    """
     return self.TimeManager(self)
 
 
@@ -553,12 +570,13 @@ class PmfStat(Stat):
   bit expensive, so its child values are only updated once every
   twenty seconds."""
 
-  def __init__(self, name, _=None):
+  def __init__(self, name, _=None, recalcPeriod=20):
     Stat.__init__(self, name, None)
+    self.__recalcPeriod = recalcPeriod
 
 
   def _getDefault(self, _):
-    return PmfStatDict()
+    return PmfStatDict(recalcPeriod=self.__recalcPeriod)
 
 
   def __set__(self, instance, value):
@@ -591,7 +609,39 @@ class NamedPmfDictStat(Stat):
   def _getDefault(self, _):
     return NamedPmfDict()
 
+class RecentFps(object):
+  def __init__(self, window=20):
+    self.window = window
+    self.recentTimes = []
 
+  def mark(self):
+    now = time.time()
+    self.recentTimes.append(now)
+    self.recentTimes = self.recentTimes[-self.window:]
+
+  def rate(self):
+    def dec(innerFunc):
+      def f(*a, **kw):
+        self.mark()
+        return innerFunc(*a, **kw)
+      return f
+    return dec
+
+  def __call__(self):
+    if len(self.recentTimes) < 2:
+      return {}
+    recents = sorted(round(1 / (b - a), 3)
+                      for a, b in zip(self.recentTimes[:-1],
+                                      self.recentTimes[1:]))
+    avg = (len(self.recentTimes) - 1) / (
+      self.recentTimes[-1] - self.recentTimes[0])
+    return {'average': round(avg, 5), 
+            'recents': recents, 
+            'period': round(1 / avg, 1) if avg > 0 else None}
+
+class RecentFpsStat(Stat):
+  def _getDefault(self, _):
+    return RecentFps()
 
 class StateTimeStatDict(UserDict):
   """Special dict that tracks time spent in current state."""
