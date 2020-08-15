@@ -45,8 +45,8 @@ class AggregationTest(unittest.TestCase):
         }})
     agg.addSource('source1', {'a': {'200': 10, '302': 10, '404': 1, '500': 3}})
     result = agg.result()
-    self.assertEquals(result['a']['success']['sum'], 20)
-    self.assertEquals(result['a']['error']['sum'], 4)
+    self.assertEqual(result['a']['success']['sum'], 20)
+    self.assertEqual(result['a']['error']['sum'], 4)
 
 
 

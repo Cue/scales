@@ -130,7 +130,7 @@ class StatsTest(unittest.TestCase):
     c = b.getChild(TypedChild)
     c.countStat += 2
 
-    self.assertEquals({
+    self.assertEqual({
       'path': {
         'to': {
           'A': {
@@ -159,7 +159,7 @@ class StatsTest(unittest.TestCase):
     c = b.getChild(Child)
     c.countStat += 2
 
-    self.assertEquals({
+    self.assertEqual({
       'path': {
         'to': {
           'A': {
@@ -184,7 +184,7 @@ class StatsTest(unittest.TestCase):
     c = a.getChild(Child, 'sub/path')
     c.countStat += 1
 
-    self.assertEquals({
+    self.assertEqual({
       'path': {
         'to': {
           'A': {
@@ -213,7 +213,7 @@ class StatsTest(unittest.TestCase):
     """Helps test summed stats."""
     c = a.getChild(Child)
 
-    self.assertEquals({
+    self.assertEqual({
       'Root': {
         'C': {},
       }
@@ -221,7 +221,7 @@ class StatsTest(unittest.TestCase):
 
     c.countStat += 2
 
-    self.assertEquals({
+    self.assertEqual({
       'Root': {
         'count': 2,
         'C': {
@@ -231,7 +231,7 @@ class StatsTest(unittest.TestCase):
     }, scales.getStats())
 
     d = a.getChild(Child, 'D')
-    self.assertEquals({
+    self.assertEqual({
       'Root': {
         'count': 2,
         'C': {
@@ -243,7 +243,7 @@ class StatsTest(unittest.TestCase):
 
     c.countStat -= 1
     d.countStat += 5
-    self.assertEquals({
+    self.assertEqual({
       'Root': {
         'count': 6,
         'C': {
@@ -266,7 +266,7 @@ class StatsTest(unittest.TestCase):
     for _ in range(2):
       c.stateStat = 'good'
       d.stateStat = 'bad'
-      self.assertEquals({
+      self.assertEqual({
         'Root': {
           'state': {
             'good': 1,
@@ -283,7 +283,7 @@ class StatsTest(unittest.TestCase):
 
     c.stateStat = 'great'
     d.stateStat = 'great'
-    self.assertEquals({
+    self.assertEqual({
       'Root': {
         'state': {
           'great': 2,
@@ -313,7 +313,7 @@ class StatsTest(unittest.TestCase):
     a.activeUrlsStat['http://www.google.com'] += 2
     a.activeUrlsStat['http://www.greplin.com'] -= 1
 
-    self.assertEquals({
+    self.assertEqual({
       'path': {
         'to': {
           'A': {
@@ -341,7 +341,7 @@ class StatsTest(unittest.TestCase):
     errorHolder.errorsStat['404'] += 100
     errorHolder.errorsStat['400'] += 1
 
-    self.assertEquals({
+    self.assertEqual({
       'Root': {
         'errors': {
           '400': 4,
@@ -360,10 +360,10 @@ class StatsTest(unittest.TestCase):
   def testDynamic(self):
     """Tests for dynamic stats."""
     DynamicRoot()
-    self.assertEquals(100, scales.getStats()['dynamic']())
+    self.assertEqual(100, scales.getStats()['dynamic']())
 
     DynamicRoot.value = 200
-    self.assertEquals(200, scales.getStats()['dynamic']())
+    self.assertEqual(200, scales.getStats()['dynamic']())
 
 
   def testCollection(self):
@@ -373,7 +373,7 @@ class StatsTest(unittest.TestCase):
     collection.histo['cheese'] += 12300
     collection.histo['cheese'] += 45
 
-    self.assertEquals({
+    self.assertEqual({
       'thePath': {
         'count': 100,
         'histo': {
