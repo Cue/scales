@@ -64,7 +64,7 @@ class StatsTest(unittest.TestCase):
     out = six.StringIO()
     formats.jsonFormat(out)
 
-    self.assertEquals('{"here": {"count": 1}}\n', out.getvalue())
+    self.assertEqual('{"here": {"count": 1}}\n', out.getvalue())
 
 
 
@@ -91,7 +91,7 @@ class UnicodeFormatTest(unittest.TestCase):
     out = six.StringIO()
     stats = {'name': self.UNICODE_VALUE}
     formats.jsonFormat(out, statDict=stats)
-    self.assertEquals(stats, json.loads(out.getvalue()))
+    self.assertEqual(stats, json.loads(out.getvalue()))
 
 
   def testJsonFormatBinaryGarbage(self):
@@ -99,6 +99,6 @@ class UnicodeFormatTest(unittest.TestCase):
     out = six.StringIO()
     stats = {'garbage': '\xc2\xc2 ROAR!! \0\0'}
     formats.jsonFormat(out, statDict=stats)
-    self.assertEquals(json.loads(out.getvalue()), {'garbage': six.u('\xc2\xc2 ROAR!! \0\0')})
+    self.assertEqual(json.loads(out.getvalue()), {'garbage': six.u('\xc2\xc2 ROAR!! \0\0')})
 
 
