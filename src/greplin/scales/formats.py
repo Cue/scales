@@ -22,6 +22,11 @@ import json
 import operator
 import re
 
+try:
+    from cgi import escape
+except ImportError:
+    from html import escape
+
 OPERATORS = {
   '>=': operator.ge,
   '>': operator.gt,
@@ -105,7 +110,7 @@ def _htmlRenderDict(pathParts, statDict, output):
 
   output.write('<div class="level">')
   for key in keys:
-    keyStr = cgi.escape(_utf8str(key))
+    keyStr = escape(_utf8str(key))
     value = statDict[key]
     if hasattr(value, '__call__'):
       value = value()
@@ -119,7 +124,7 @@ def _htmlRenderDict(pathParts, statDict, output):
         _htmlRenderDict(valuePath, value, output)
     else:
       output.write('<div><span class="key">%s</span> <span class="%s">%s</span></div>' %
-                   (keyStr, type(value).__name__, cgi.escape(_utf8str(value)).replace('\n', '<br/>')))
+                   (keyStr, type(value).__name__, escape(_utf8str(value)).replace('\n', '<br/>')))
 
   if links:
     for link in links:
